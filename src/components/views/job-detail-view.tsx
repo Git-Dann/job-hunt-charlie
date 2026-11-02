@@ -2,13 +2,17 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, File06, LinkExternal01, MessageTextSquare02, Stars02, Trash01, Users01 } from "@untitledui/icons";
+import { ArrowLeft, ArrowRight, CalendarPlus01, File06, LinkExternal01, MessageTextSquare02, Stars02, Trash01, Users01 } from "@untitledui/icons";
 import { Badge } from "@/components/base/badges/badges";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { NativeSelect } from "@/components/base/select/select-native";
 import { TextArea } from "@/components/base/textarea/textarea";
+import { AddInterviewDialog } from "@/components/app/add-interview-dialog";
+import { CompanyCard } from "@/components/app/company-card";
 import { KeywordMatch } from "@/components/app/keyword-match";
+import { SalaryCard } from "@/components/app/salary-card";
+import { formatWhen } from "@/lib/interview-actions";
 import { Card, CardHeader, Page } from "@/components/app/page-header";
 import { linkedinPeopleSearch } from "@/lib/boards";
 import { profileToText } from "@/lib/cv";
@@ -30,7 +34,7 @@ const JOB_PROMPTS = [
 ];
 
 export const JobDetailView = ({ id }: { id: string }) => {
-    const { jobs, profile, cvs } = useAppData();
+    const { jobs, profile, cvs, interviews } = useAppData();
     const hydrated = useHydrated();
     const router = useRouter();
     const job = jobs.find((j) => j.id === id);
@@ -49,6 +53,7 @@ export const JobDetailView = ({ id }: { id: string }) => {
         );
 
     const tailoredCvs = cvs.filter((c) => c.jobId === job.id);
+    const jobInterviews = interviews.filter((i) => i.jobId === job.id).sort((a, b) => a.when.localeCompare(b.when));
     const set = (patch: Parameters<typeof updateJob>[1]) => updateJob(job.id, patch);
 
     return (
@@ -98,6 +103,36 @@ export const JobDetailView = ({ id }: { id: string }) => {
                             <Input label="Applied on" type="date" value={job.appliedAt?.slice(0, 10) ?? ""} onChange={(v) => set({ appliedAt: v ? new Date(v).toISOString() : undefined })} />
                             <TextArea className="sm:col-span-2" label="Notes" rows={4} value={job.notes ?? ""} onChange={(v) => set({ notes: v })} placeholder="Who you spoke to, questions they asked, how you felt…" />
                         </div>
+                    </Card>
+
+                    <Card>
+                        <CardHeader
+                            title="Interviews"
+                            actions={
+                                <AddInterviewDialog jobId={job.id}>
+                                    <Button size="sm" iconLeading={CalendarPlus01}>
+                                        Add interview
+                                    </Button>
+                                </AddInterviewDialog>
+                            }
+                        />
+                        {jobInterviews.length ? (
+                            <ul className="divide-y divide-secondary">
+                                {jobInterviews.map((iv) => (
+                                    <li key={iv.id}>
+                                        <a href={`/interviews/${iv.id}`} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-primary_hover md:px-6">
+                                            <span className="min-w-0">
+                                                <span className="block truncate text-sm font-semibold text-secondary">{iv.round}</span>
+                                                <span className="block text-sm text-tertiary">{formatWhen(iv.when)}</span>
+                                            </span>
+                                            <span className="text-sm font-semibold text-brand-secondary">Prep pack →</span>
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="px-4 py-4 text-sm text-tertiary md:px-6">Got an interview? Add it for a prep pack, checklist and calendar invite.</p>
+                        )}
                     </Card>
 
                     <Card>
@@ -161,6 +196,8 @@ export const JobDetailView = ({ id }: { id: string }) => {
                     <Button color="secondary" iconLeading={MessageTextSquare02} href={`/answers?job=${job.id}`}>
                         Answer an application question
                     </Button>
+                    <SalaryCard title={job.title} location={job.location} advertised={job.salary} jobId={job.id} />
+                    <CompanyCard company={job.company} jobId={job.id} />
                     {job.company && (
                         <Button color="secondary" iconLeading={Users01} href={linkedinPeopleSearch(job.company, job.title)} target="_blank" rel="noreferrer">
                             Find people at {job.company}

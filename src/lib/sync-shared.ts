@@ -9,7 +9,7 @@ export function forCloud(d: AppData): AppData {
     return {
         ...d,
         ai: { ...d.ai, apiKey: "" },
-        keys: { ...d.keys, reedApiKey: "", adzunaAppKey: "" },
+        keys: { ...d.keys, reedApiKey: "", adzunaAppKey: "", companiesHouseKey: "" },
     };
 }
 
@@ -18,7 +18,7 @@ export function fromCloud(cloud: AppData, local: AppData): AppData {
     return {
         ...cloud,
         ai: { ...cloud.ai, apiKey: local.ai.apiKey, ...(cloud.ai.provider ? {} : { provider: local.ai.provider, model: local.ai.model }) },
-        keys: { ...cloud.keys, reedApiKey: local.keys.reedApiKey, adzunaAppKey: local.keys.adzunaAppKey },
+        keys: { ...cloud.keys, reedApiKey: local.keys.reedApiKey, adzunaAppKey: local.keys.adzunaAppKey, companiesHouseKey: local.keys.companiesHouseKey },
     };
 }
 
@@ -49,6 +49,7 @@ export function mergeData(local: AppData, cloud: AppData): AppData {
         cvs: mergeById(local.cvs, cloud.cvs),
         searches: mergeById(local.searches, cloud.searches),
         answers: mergeById(local.answers, cloud.answers),
+        interviews: mergeById(local.interviews, cloud.interviews),
         profile: {
             // The newer profile wins field by field, with gaps filled from the other copy.
             ...other,

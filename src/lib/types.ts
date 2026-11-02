@@ -133,6 +133,38 @@ export interface SourceKeys {
     adzunaAppId: string;
     adzunaAppKey: string;
     adzunaCountry: string;
+    /** Free key from the Companies House developer hub (optional if the site owner set one). */
+    companiesHouseKey?: string;
+}
+
+export type InterviewOutcome = "upcoming" | "waiting" | "next-round" | "offer" | "rejected";
+
+export interface ChecklistItem {
+    id: string;
+    text: string;
+    done: boolean;
+}
+
+export interface Interview {
+    id: string;
+    jobId: string;
+    round: string;
+    /** Local date-time, e.g. "2026-11-12T14:30". */
+    when: string;
+    durationMins: number;
+    format: "video" | "phone" | "in-person" | "assessment";
+    where: string;
+    interviewers: string;
+    notes: string;
+    questionsToAsk: string;
+    checklist: ChecklistItem[];
+    outcome: InterviewOutcome;
+    feedback: string;
+    updatedAt?: string;
+}
+
+export interface Goals {
+    weeklyApplications: number;
 }
 
 export interface AppData {
@@ -142,6 +174,8 @@ export interface AppData {
     cvs: CvVersion[];
     searches: SavedSearch[];
     answers: SavedAnswer[];
+    interviews: Interview[];
+    goals: Goals;
     ai: AiSettings;
     keys: SourceKeys;
     onboarded: boolean;

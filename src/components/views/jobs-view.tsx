@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Briefcase01, Building07, CalendarCheck01, Download01, Plus, SearchLg } from "@untitledui/icons";
+import { Briefcase01, Building07, CalendarCheck01, Download01, Link01, Plus, SearchLg } from "@untitledui/icons";
 import { Tabs } from "@/components/application/tabs/tabs";
 import { Badge } from "@/components/base/badges/badges";
 import { Button } from "@/components/base/buttons/button";
@@ -10,6 +10,7 @@ import { Input } from "@/components/base/input/input";
 import { NativeSelect } from "@/components/base/select/select-native";
 import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-icon";
 import { AddJobDialog } from "@/components/app/add-job-dialog";
+import { JobsSubnav } from "@/components/app/jobs-subnav";
 import { Page, PageHeader } from "@/components/app/page-header";
 import { formatDate, timeAgo, updateJob } from "@/lib/jobs";
 import { useAppData, useHydrated } from "@/lib/store";
@@ -47,6 +48,7 @@ export const JobsView = () => {
 
     return (
         <Page>
+            <JobsSubnav />
             <PageHeader
                 title="My applications"
                 description="Every job you've saved, where it's up to, and what to do next."
@@ -57,6 +59,9 @@ export const JobsView = () => {
                                 Export
                             </Button>
                         )}
+                        <Button color="secondary" iconLeading={Link01} href="/add-job">
+                            Save from a link
+                        </Button>
                         <AddJobDialog>
                             <Button iconLeading={Plus}>Add a job</Button>
                         </AddJobDialog>

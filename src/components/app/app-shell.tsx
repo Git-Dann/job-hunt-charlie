@@ -14,7 +14,7 @@ import { SyncIndicator, SyncManager } from "./sync-status";
 import { AlertRunner } from "./alert-runner";
 import { newCount } from "@/lib/alerts";
 import { useAppData, useHydrated } from "@/lib/store";
-import { NAV, SETTINGS_NAV, isActive } from "./nav";
+import { NAV, SETTINGS_NAV, isActive, isActiveMobile } from "./nav";
 
 export const AppShell = ({ children }: { children: ReactNode }) => {
     const pathname = usePathname();
@@ -100,8 +100,8 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
                 className="fixed inset-x-0 bottom-0 z-30 border-t border-secondary bg-primary/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
             >
                 <ul className="mx-auto grid max-w-lg grid-cols-6">
-                    {NAV.map((item) => {
-                        const active = isActive(pathname, item.href);
+                    {NAV.filter((item) => !item.desktopOnly).map((item) => {
+                        const active = isActiveMobile(pathname, item.href);
                         return (
                             <li key={item.href}>
                                 <AriaLink

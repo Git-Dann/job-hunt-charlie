@@ -8,6 +8,7 @@ import { Input } from "@/components/base/input/input";
 import { NativeSelect } from "@/components/base/select/select-native";
 import { BuildYourOwnDialog } from "@/components/app/build-your-own-dialog";
 import { Card, CardHeader, Page, PageHeader } from "@/components/app/page-header";
+import { SaveAnywhereCard } from "@/components/app/save-anywhere-card";
 import { SyncCard } from "@/components/app/sync-card";
 import { ThemeSwitch } from "@/components/app/theme-switch";
 import { AI_PROVIDERS, defaultModel } from "@/lib/ai-models";
@@ -28,7 +29,7 @@ export const SettingsView = () => {
 
     const exportData = () => {
         // Keys stay out of the backup: it's the file most likely to be shared or emailed.
-        const safe = { ...data, ai: { ...data.ai, apiKey: "" }, keys: { ...data.keys, reedApiKey: "", adzunaAppKey: "" } };
+        const safe = { ...data, ai: { ...data.ai, apiKey: "" }, keys: { ...data.keys, reedApiKey: "", adzunaAppKey: "", companiesHouseKey: "" } };
         const blob = new Blob([JSON.stringify(safe, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
@@ -59,6 +60,8 @@ export const SettingsView = () => {
             <PageHeader title="Settings" description="Connections, backups and appearance. Everything is stored on this device only." />
             <div className="mt-6 flex max-w-3xl flex-col gap-6">
                 <SyncCard />
+
+                <SaveAnywhereCard />
 
                 <Card>
                     <div id="ai" className="scroll-mt-20" />
@@ -130,11 +133,13 @@ export const SettingsView = () => {
 
                 <Card>
                     <div id="sources" className="scroll-mt-20" />
-                    <CardHeader title="Job search sources" description="Free keys that unlock thousands more UK listings in Live results." />
+                    <CardHeader title="Free data keys" description="Free keys that unlock more UK job listings, real salary data and company checks. Each takes a couple of minutes to get." />
                     <div className="flex flex-col gap-6 px-4 py-4 md:px-6">
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-semibold text-primary">Reed</p>
+                                <p className="text-sm font-semibold text-primary">
+                                    Reed <span className="font-normal text-tertiary">— UK jobs and salaries</span>
+                                </p>
                                 <Button size="sm" color="link-color" href="https://www.reed.co.uk/developers/jobseeker" target="_blank" rel="noreferrer" iconTrailing={LinkExternal01}>
                                     Get a free key
                                 </Button>
@@ -143,7 +148,28 @@ export const SettingsView = () => {
                         </div>
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-semibold text-primary">Adzuna</p>
+                                <p className="text-sm font-semibold text-primary">
+                                    Companies House <span className="font-normal text-tertiary">— company checks</span>
+                                </p>
+                                <Button size="sm" color="link-color" href="https://developer.company-information.service.gov.uk/get-started" target="_blank" rel="noreferrer" iconTrailing={LinkExternal01}>
+                                    Get a free key
+                                </Button>
+                            </div>
+                            <Input
+                                aria-label="Companies House API key"
+                                type="password"
+                                placeholder="Companies House API key (REST)"
+                                value={keys.companiesHouseKey ?? ""}
+                                onChange={(v) => setKeys({ companiesHouseKey: v.trim() })}
+                                autoComplete="off"
+                                hint="Register, create an application, then add a REST API key. Not needed if the site owner has set one."
+                            />
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center justify-between gap-2">
+                                <p className="text-sm font-semibold text-primary">
+                                    Adzuna <span className="font-normal text-tertiary">— jobs and salary data</span>
+                                </p>
                                 <Button size="sm" color="link-color" href="https://developer.adzuna.com/signup" target="_blank" rel="noreferrer" iconTrailing={LinkExternal01}>
                                     Get a free key
                                 </Button>

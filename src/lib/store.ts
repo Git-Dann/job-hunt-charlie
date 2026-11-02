@@ -50,6 +50,7 @@ export function stampChanges(prev: AppData, next: AppData, now: string): AppData
         cvs: next.cvs === prev.cvs ? next.cvs : stamp(prev.cvs, next.cvs),
         searches: next.searches === prev.searches ? next.searches : stamp(prev.searches, next.searches),
         answers: next.answers === prev.answers ? next.answers : stamp(prev.answers, next.answers),
+        interviews: next.interviews === prev.interviews ? next.interviews : stamp(prev.interviews, next.interviews),
         profile: next.profile === prev.profile ? next.profile : { ...next.profile, updatedAt: now },
     };
 }

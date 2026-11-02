@@ -19,9 +19,12 @@ I'm job hunting in the UK. I want one place to: find jobs across lots of sites, 
    - "Tailor to a job": paste the advert and it reorders my skills and bullet points so the most relevant come first, shows a keyword match score, and lists keywords from the advert that my CV is missing. It must never make things up — only reorder what I've written.
    - A clean, ATS-friendly CV I can print or save as a PDF from the browser, with 2–3 simple template styles.
 4. **Answer bank** — my saved answers to common application-form questions ("Why do you want to work here?", notice period, salary, teamwork…). When I paste a new question, it finds my closest saved answer even if it's worded differently, fills in the company and role, and checks the word limit. No AI needed.
-5. **AI prompt library (most important)** — ready-made prompts that automatically include my CV and the job advert, for: tailoring my CV, cover letters, application questions, fit checks, interview prep, mock interviews, LinkedIn messages, follow-ups, salary negotiation and a weekly plan. Each has a Copy button and "Open in ChatGPT / Claude" buttons, so I can use them without paying for anything.
-6. **Optional AI connection** — in Settings I can paste my own API key (Anthropic, OpenAI or Google Gemini) to run prompts inside the app. The key is stored only in my browser and never saved on a server.
-7. **My data** — everything saves in my browser (no login). Export and import a backup file.
+5. **Interviews and progress** — for each interview: likely questions picked from the advert's wording, my matching saved answers, a checklist, questions to ask, notes and an "Add to calendar" file. A progress page with a weekly target, a streak and my applied → interview → offer numbers.
+6. **Company and salary checks** — a live UK company lookup from the free Companies House API, and real salary ranges from Adzuna's free API, on each saved job.
+7. **Save from anywhere** — a browser bookmark button that saves the job I'm looking at, plus "paste a link" on my phone. Download my CV as a Word file too.
+8. **AI prompt library (most important)** — ready-made prompts that automatically include my CV and the job advert, for: tailoring my CV, cover letters, application questions, fit checks, interview prep, mock interviews, LinkedIn messages, follow-ups, salary negotiation and a weekly plan. Each has a Copy button and "Open in ChatGPT / Claude" buttons, so I can use them without paying for anything.
+9. **Optional AI connection** — in Settings I can paste my own API key (Anthropic, OpenAI or Google Gemini) to run prompts inside the app. The key is stored only in my browser and never saved on a server.
+10. **My data** — everything saves in my browser (no login). Export and import a backup file.
 
 ## Design
 - Mobile-first: I'll use it mostly on my phone. Bottom tab bar on mobile, sidebar on desktop. Big, easy tap targets. No sideways scrolling.

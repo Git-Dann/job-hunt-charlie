@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Edit05, Eye, Mail01, Printer, RefreshCw01, Stars02, Trash01 } from "@untitledui/icons";
+import { ArrowLeft, Edit05, Eye, File06 as FileDocx, Mail01, Printer, RefreshCw01, Stars02, Trash01 } from "@untitledui/icons";
 import { Tabs } from "@/components/application/tabs/tabs";
 import { Badge } from "@/components/base/badges/badges";
 import { Button } from "@/components/base/buttons/button";
@@ -189,6 +189,21 @@ export const CvVersionView = ({ id }: { id: string }) => {
                 <div className="flex flex-wrap gap-2">
                     <Button iconLeading={Printer} onClick={() => window.print()}>
                         Print / save PDF
+                    </Button>
+                    <Button
+                        color="secondary"
+                        iconLeading={FileDocx}
+                        onClick={async () => {
+                            const { cvDocxBlob } = await import("@/lib/cv-docx");
+                            const blob = await cvDocxBlob(resolved, cv.template);
+                            const a = document.createElement("a");
+                            a.href = URL.createObjectURL(blob);
+                            a.download = `${(profile.name || "CV").replace(/[^a-z0-9]+/gi, "-")}-CV.docx`;
+                            a.click();
+                            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                        }}
+                    >
+                        Download Word
                     </Button>
                     <CopyButton text={cvText} label="Copy as text" size="md" />
                     <CoverLetterDialog cv={cv} />

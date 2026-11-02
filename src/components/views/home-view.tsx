@@ -11,6 +11,7 @@ import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-ic
 import { BuildYourOwnDialog } from "@/components/app/build-your-own-dialog";
 import { Card, CardHeader, Page } from "@/components/app/page-header";
 import { newCount } from "@/lib/alerts";
+import { weeklyApplications } from "@/lib/progress";
 import { profileCompleteness } from "@/lib/cv";
 import { formatDate } from "@/lib/jobs";
 import { useAppData, useHydrated } from "@/lib/store";
@@ -36,10 +37,21 @@ export const HomeView = () => {
     const firstName = profile.name.trim().split(" ")[0];
 
     const counts = Object.fromEntries(JOB_STATUSES.map((s) => [s.id, jobs.filter((j) => j.status === s.id).length]));
-    const upcoming = jobs
-        .filter((j) => j.nextStep && j.status !== "rejected")
-        .sort((a, b) => (a.nextStepDate ?? "9999").localeCompare(b.nextStepDate ?? "9999"))
-        .slice(0, 5);
+    const upcoming = [
+        ...data.interviews
+            .filter((i) => i.outcome === "upcoming" && new Date(i.when).getTime() > Date.now() - 3 * 3_600_000)
+            .map((i) => {
+                const j = jobs.find((x) => x.id === i.jobId);
+                return { key: i.id, href: `/interviews/${i.id}`, title: `Interview: ${i.round}`, sub: j ? `${j.title} · ${j.company}` : "", date: i.when };
+            }),
+        ...jobs
+            .filter((j) => j.nextStep && j.status !== "rejected")
+            .map((j) => ({ key: j.id, href: `/jobs/${j.id}`, title: j.nextStep!, sub: `${j.title} · ${j.company}`, date: j.nextStepDate })),
+    ]
+        .sort((a, b) => (a.date ?? "9999").localeCompare(b.date ?? "9999"))
+        .slice(0, 6);
+    const weeks = weeklyApplications(jobs, new Date(), 1);
+    const thisWeek = weeks[0].count;
 
     const steps = [
         { done: completeness.percent >= 60, title: "Add your CV", body: "Paste your current CV or fill in your details. Everything else builds on this.", href: "/cv", cta: "Add my CV" },
@@ -172,19 +184,17 @@ export const HomeView = () => {
                         />
                         {hydrated && upcoming.length ? (
                             <ul className="divide-y divide-secondary">
-                                {upcoming.map((j) => (
-                                    <li key={j.id}>
-                                        <a href={`/jobs/${j.id}`} className="flex items-center gap-3 px-4 py-3 outline-focus-ring hover:bg-primary_hover focus-visible:outline-2 md:px-6">
+                                {upcoming.map((u) => (
+                                    <li key={u.key}>
+                                        <a href={u.href} className="flex items-center gap-3 px-4 py-3 outline-focus-ring hover:bg-primary_hover focus-visible:outline-2 md:px-6">
                                             <FeaturedIcon icon={CalendarCheck01} color="gray" theme="modern" size="md" />
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm font-semibold text-primary">{j.nextStep}</p>
-                                                <p className="truncate text-sm text-tertiary">
-                                                    {j.title} · {j.company}
-                                                </p>
+                                                <p className="truncate text-sm font-semibold text-primary">{u.title}</p>
+                                                <p className="truncate text-sm text-tertiary">{u.sub}</p>
                                             </div>
-                                            {j.nextStepDate && (
+                                            {u.date && (
                                                 <Badge size="sm" color="brand">
-                                                    {formatDate(j.nextStepDate, { weekday: "short", day: "numeric", month: "short" })}
+                                                    {formatDate(u.date, { weekday: "short", day: "numeric", month: "short" })}
                                                 </Badge>
                                             )}
                                         </a>
@@ -200,6 +210,19 @@ export const HomeView = () => {
                 </div>
 
                 <div className="flex flex-col gap-6">
+                    <Card className="p-4 md:p-5">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <p className="text-sm font-semibold text-primary">This week</p>
+                                <p className="text-sm text-tertiary">{hydrated ? `${thisWeek} of ${data.goals.weeklyApplications} applications` : " "}</p>
+                            </div>
+                            <Button size="sm" color="link-color" href="/progress" iconTrailing={ArrowRight}>
+                                Progress
+                            </Button>
+                        </div>
+                        <ProgressBar value={hydrated ? Math.min(thisWeek, data.goals.weeklyApplications) : 0} max={data.goals.weeklyApplications} className="mt-3" />
+                    </Card>
+
                     <Card className="p-4 md:p-5">
                         <div className="flex items-start gap-3">
                             <FeaturedIcon icon={File06} color="brand" theme="light" size="md" />
