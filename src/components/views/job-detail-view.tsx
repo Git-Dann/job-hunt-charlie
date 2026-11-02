@@ -153,7 +153,7 @@ export const JobDetailView = ({ id }: { id: string }) => {
                                 <p className="text-sm text-tertiary">{cvText.length > 100 ? "Paste the job description to see how well your CV matches." : "Add your CV to see how well you match."}</p>
                             )}
                             <Button
-                                className="mt-5 w-full"
+                                className="mt-5 w-full whitespace-normal text-center"
                                 iconLeading={File06}
                                 onClick={() => router.push(`/cv/${createCv({ jobId: job.id })}`)}
                                 isDisabled={profile.experience.length === 0 && !profile.summary}
@@ -193,13 +193,13 @@ export const JobDetailView = ({ id }: { id: string }) => {
                         </ul>
                     </Card>
 
-                    <Button color="secondary" iconLeading={MessageTextSquare02} href={`/answers?job=${job.id}`}>
+                    <Button color="secondary" className="whitespace-normal text-center" iconLeading={MessageTextSquare02} href={`/answers?job=${job.id}`}>
                         Answer an application question
                     </Button>
                     <SalaryCard title={job.title} location={job.location} advertised={job.salary} jobId={job.id} />
                     <CompanyCard company={job.company} jobId={job.id} />
                     {job.company && (
-                        <Button color="secondary" iconLeading={Users01} href={linkedinPeopleSearch(job.company, job.title)} target="_blank" rel="noreferrer">
+                        <Button color="secondary" className="whitespace-normal text-center" iconLeading={Users01} href={linkedinPeopleSearch(job.company, job.title)} target="_blank" rel="noreferrer">
                             Find people at {job.company}
                         </Button>
                     )}

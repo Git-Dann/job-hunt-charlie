@@ -108,7 +108,7 @@ export const InterviewDetailView = ({ id }: { id: string }) => {
                                                     <p className="mt-2 rounded-lg bg-secondary p-3 text-sm whitespace-pre-wrap text-secondary">{fillAnswer(q.answer.answer, job)}</p>
                                                 </details>
                                             ) : (
-                                                <a href="/answers" className="mt-1 inline-block text-sm font-medium text-brand-secondary hover:underline">
+                                                <a href="/answers" className="mt-1 inline-flex items-center text-sm font-medium text-brand-secondary hover:underline max-sm:min-h-10">
                                                     Prepare an answer →
                                                 </a>
                                             )}
@@ -150,7 +150,7 @@ export const InterviewDetailView = ({ id }: { id: string }) => {
                                         isSelected={c.done}
                                         onChange={(v) => set({ checklist: iv.checklist.map((x) => (x.id === c.id ? { ...x, done: v } : x)) })}
                                     />
-                                    <button type="button" aria-label={`Remove "${c.text}"`} className="text-fg-quaternary hover:text-fg-quaternary_hover" onClick={() => set({ checklist: iv.checklist.filter((x) => x.id !== c.id) })}>
+                                    <button type="button" aria-label={`Remove "${c.text}"`} className="-my-2 flex size-10 shrink-0 items-center justify-center rounded-lg text-fg-quaternary outline-focus-ring hover:bg-primary_hover hover:text-fg-quaternary_hover focus-visible:outline-2" onClick={() => set({ checklist: iv.checklist.filter((x) => x.id !== c.id) })}>
                                         <Trash01 className="size-4" />
                                     </button>
                                 </li>

@@ -106,7 +106,12 @@ export const parseHimalayas = (d: any): JobListing[] =>
             url,
             source: "Himalayas",
             description: htmlToText(j.description || j.excerpt),
-            salary: salaryRange(j.minSalary, j.maxSalary, j.currency === "GBP" ? "£" : j.currency === "EUR" ? "€" : "$"),
+            salary: salaryRange(
+                j.minSalary,
+                j.maxSalary,
+                j.currency === "GBP" ? "£" : j.currency === "EUR" ? "€" : "$",
+                j.salaryPeriod === "monthly" ? " a month" : j.salaryPeriod === "hourly" ? " an hour" : j.salaryPeriod === "weekly" ? " a week" : "",
+            ),
             postedAt: toIsoDate(j.pubDate),
             remote: true,
             tags: j.categories?.slice(0, 6),

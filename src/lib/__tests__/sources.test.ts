@@ -26,6 +26,14 @@ describe("job API parsers", () => {
     });
 });
 
+describe("salary periods from real Himalayas data", () => {
+    it("labels monthly salaries as monthly", async () => {
+        const { parseHimalayas } = await import("../sources/apis");
+        const [j] = parseHimalayas({ jobs: [{ title: "Paid Media Operator", companyName: "Triangulate", minSalary: 3000, maxSalary: 6000, salaryPeriod: "monthly", currency: "USD", applicationLink: "https://himalayas.app/x", pubDate: 1793281205 }] });
+        expect(j.salary).toBe("$3k–$6k a month");
+    });
+});
+
 describe("careers pages", () => {
     it("detects applicant tracking systems from a link", () => {
         expect(detectPage("https://boards.greenhouse.io/monzo")).toEqual({ kind: "greenhouse", slug: "monzo" });
@@ -48,7 +56,7 @@ describe("careers pages", () => {
         const gh = parseGreenhouse({ jobs: [{ title: "PM", absolute_url: "https://x/1", location: { name: "London" }, content: "&lt;p&gt;Hello &amp;amp; welcome&lt;/p&gt;", updated_at: "2026-10-01T00:00:00Z" }] }, "acme");
         expect(gh[0].description).toBe("Hello & welcome");
         const lv = parseLever([{ text: "Designer", hostedUrl: "https://jobs.lever.co/a/1", categories: { location: "Remote, UK", team: "Brand" }, createdAt: 1790000000000, descriptionPlain: "Design" }], "a");
-        expect(lv[0]).toMatchObject({ title: "Designer", remote: true, tags: ["Brand"] });
+        expect(lv[0]).toMatchObject({ title: "Designer", company: "A", remote: true, tags: ["Brand"] });
         const ab = parseAshby({ jobs: [{ title: "Ops", jobUrl: "https://jobs.ashbyhq.com/a/1", location: "Manchester", isListed: true, isRemote: false }, { title: "Hidden", jobUrl: "u", isListed: false }] }, "a");
         expect(ab).toHaveLength(1);
     });

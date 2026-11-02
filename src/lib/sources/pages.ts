@@ -46,6 +46,9 @@ export function detectPage(raw: string): PageTarget {
 
 // ── ATS parsers (pure) ──────────────────────────────────────────────────────
 
+/** Lever and Ashby only give a URL slug ("octoenergy"); make it presentable ("Octoenergy"). */
+export const companyFromSlug = (slug: string) => slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
 export const parseGreenhouse = (d: any, company: string): JobListing[] =>
     (d?.jobs ?? []).map((j: any) => ({
         id: jobId("greenhouse", j.absolute_url),
@@ -64,7 +67,7 @@ export const parseLever = (d: any, company: string): JobListing[] =>
     (Array.isArray(d) ? d : []).map((j: any) => ({
         id: jobId("lever", j.hostedUrl),
         title: j.text,
-        company,
+        company: companyFromSlug(company),
         location: j.categories?.location ?? (j.categories?.allLocations ?? []).join(", "),
         url: j.hostedUrl,
         source: "Lever",
@@ -81,7 +84,7 @@ export const parseAshby = (d: any, company: string): JobListing[] =>
         .map((j: any) => ({
             id: jobId("ashby", j.jobUrl),
             title: j.title,
-            company,
+            company: companyFromSlug(company),
             location: [j.location, ...(j.secondaryLocations ?? []).map((l: any) => l.location)].filter(Boolean).join(", "),
             url: j.jobUrl,
             source: "Ashby",

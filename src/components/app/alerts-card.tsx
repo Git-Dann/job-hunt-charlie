@@ -40,7 +40,7 @@ export const AlertsCard = ({ onLoad }: { onLoad: (s: SavedSearch) => void }) => 
                             <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center md:px-6">
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <button type="button" onClick={() => onLoad(s)} className="truncate text-left text-sm font-semibold text-primary outline-focus-ring hover:underline focus-visible:outline-2">
+                                        <button type="button" onClick={() => onLoad(s)} className="truncate text-left text-sm font-semibold text-primary outline-focus-ring hover:underline focus-visible:outline-2 max-sm:min-h-10">
                                             {s.name}
                                         </button>
                                         {s.alerts && count > 0 && (
