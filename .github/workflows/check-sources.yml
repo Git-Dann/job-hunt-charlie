@@ -20,6 +20,13 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: npx tsc --noEmit
+      - name: Build the app and call its API routes for real
+        run: |
+          npx next build
+          (npx next start -p 3000 &) && sleep 6
+          node scripts/smoke-api.mjs http://localhost:3000
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
       - run: npx tsx scripts/check-sources.ts
         env:
           REED_API_KEY: ${{ secrets.REED_API_KEY }}

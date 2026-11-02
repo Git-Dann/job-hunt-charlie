@@ -94,7 +94,7 @@ function exclusive(fn: () => Promise<void>): Promise<void> {
     return run;
 }
 
-function applyCloud(cloud: unknown, version: number, mode: "replace" | "merge") {
+function applyCloud(cloud: unknown, mode: "replace" | "merge") {
     const local = getData();
     const incoming = fromCloud(normaliseData(cloud), local);
     const next = mode === "merge" ? mergeData(local, incoming) : incoming;
@@ -119,7 +119,7 @@ async function pushNow(attempt = 0): Promise<void> {
     }
     if (code === 409 && attempt < 3) {
         // Another device saved first: combine both, then save the combination.
-        applyCloud(json.data, json.version, "merge");
+        applyCloud(json.data, "merge");
         save({ ...s, version: json.version, dirty: true });
         return pushNow(attempt + 1);
     }
@@ -162,7 +162,7 @@ export function pull(force = false): Promise<void> {
         const now = load();
         if (!now) return;
         if (json.version > now.version) {
-            applyCloud(json.data, json.version, now.dirty ? "merge" : "replace");
+            applyCloud(json.data, now.dirty ? "merge" : "replace");
             save({ ...load()!, version: json.version });
         }
         if (load()?.dirty) await pushNow();
@@ -190,7 +190,7 @@ export async function joinSync(input: string): Promise<void> {
     if (!ok) throw new Error(json.error ?? "Couldn't find that sync code.");
     const local = getData();
     const hasLocal = local.jobs.length > 0 || local.cvs.length > 0 || local.profile.name.trim() !== "" || local.profile.experience.length > 0;
-    applyCloud(json.data, json.version, hasLocal ? "merge" : "replace");
+    applyCloud(json.data, hasLocal ? "merge" : "replace");
     save({ code, version: json.version, dirty: hasLocal, lastSyncedAt: new Date().toISOString() });
     setStatus({ state: "idle", code, message: undefined, lastSyncedAt: new Date().toISOString() });
     if (hasLocal) await exclusive(() => pushNow());

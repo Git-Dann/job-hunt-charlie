@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import {
     AlertCircle,
     BellRinging03,
-    BookmarkAdd,
     CheckCircle,
     Globe02,
     InfoCircle,
@@ -14,7 +13,6 @@ import {
     RefreshCw01,
     SearchLg,
     Stars02,
-    XClose,
     Zap,
 } from "@untitledui/icons";
 import { Tabs } from "@/components/application/tabs/tabs";
