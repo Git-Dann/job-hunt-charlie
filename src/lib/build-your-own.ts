@@ -7,7 +7,7 @@ I'm job hunting in the UK. I want one place to: find jobs across lots of sites, 
 ## Must-have features
 1. **Job search**
    - I type keywords (e.g. "marketing manager"), a location and a "remote only" toggle.
-   - One-tap buttons open that search on LinkedIn, Indeed UK, Reed, Totaljobs, CV-Library, Guardian Jobs, Civil Service Jobs, NHS Jobs, CharityJob, Glassdoor and Google Jobs.
+   - One-tap buttons open that search on LinkedIn, Indeed UK, Reed, Totaljobs, CV-Library, Civil Service Jobs, NHS Jobs, CharityJob, Glassdoor and Google Jobs.
    - A "live results" list pulled from free job APIs that don't need a key (Remotive, Arbeitnow, The Muse, Jobicy, Himalayas, RemoteOK), plus Reed and Adzuna if I add my own free API keys.
    - A "check a careers page" box: I paste company careers page links and it lists their open roles. Use the public job APIs behind Greenhouse, Lever, Ashby, Workable and SmartRecruiters pages, and fall back to reading schema.org JobPosting data on any other page.
    - Filter results by my keywords, and save any job to my tracker with one tap.

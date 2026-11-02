@@ -68,15 +68,6 @@ export const BOARDS: Board[] = [
         build: (s) => `https://www.cv-library.co.uk/search-jobs?q=${q(s.keywords)}&geo=${q(s.location)}${s.remoteOnly ? "&remote=1" : ""}&order-by=date`,
     },
     {
-        id: "guardian",
-        name: "Guardian Jobs",
-        short: "Guardian Jobs",
-        home: "https://jobs.theguardian.com/",
-        region: "UK",
-        note: "Charity, public sector, media and education.",
-        build: (s) => `https://jobs.theguardian.com/searchjobs/?Keywords=${q(s.keywords)}&LocationId=&RadialLocation=${q(s.location)}`,
-    },
-    {
         id: "civilservice",
         name: "Civil Service Jobs",
         short: "Civil Service",

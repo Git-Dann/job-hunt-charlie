@@ -9,16 +9,16 @@ A personal job-hunting portal, built mobile-first on [Untitled UI React](https:/
 | Page | What it does |
 |---|---|
 | **Home** | Quick search, application counts, upcoming next steps, CV completeness, setup checklist |
-| **Find jobs** | One-tap searches on 14 job boards (LinkedIn, Indeed, Reed, Totaljobs, CV-Library, Guardian, Civil Service, NHS, CharityJob…). **Live results** from free job APIs (Reed and Adzuna with a free key; Remotive, Jobicy, Himalayas, RemoteOK, The Muse and Arbeitnow need no key). **Careers pages**: paste company jobs pages and their open roles are listed. This reads the public feeds behind Greenhouse, Lever, Ashby, Workable, SmartRecruiters and Recruitee, schema.org job data, RSS feeds, and job-looking links. Saved searches. |
+| **Find jobs** | One-tap searches on 13 job boards (LinkedIn, Indeed, Reed, Totaljobs, CV-Library, Civil Service, NHS, CharityJob…). **Live results** from free job APIs (Reed and Adzuna with a free key; Remotive, Jobicy, Himalayas, RemoteOK, The Muse and Arbeitnow need no key). **Careers pages**: paste company jobs pages and their open roles are listed. This reads the public feeds behind Greenhouse, Lever, Ashby, Workable, SmartRecruiters and Recruitee, schema.org job data, RSS feeds, and job-looking links. Saved searches. |
 | **My applications** | Tracker (Saved, Applied, Interviewing, Offer, Closed) with next steps, notes and contacts. CSV export. Per-job CV match score and job-specific AI prompts. |
 | **CV builder** | Your details, entered once (or paste your current CV). Tailored versions per job: paste the advert, and skills and achievements are reordered to match it. It shows a keyword match score and the keywords you're missing. Nothing is invented. 3 print styles, saved as PDF from the browser. Includes a no-AI cover letter drafter. |
 | **AI prompts** | 22 expert prompts (fit check, tailor CV, cover letter, application questions, interview prep, mock interview, outreach, negotiation…), filled in with your CV and the chosen job. Copy, or open ChatGPT or Claude with the prompt already filled in. |
-| **Settings** | Optional: connect your own Anthropic, OpenAI or Gemini key to run prompts in the app. Free Reed and Adzuna keys. Backup and restore. Light and dark mode. |
+| **Settings** | Sync across devices (Neon). Optional: connect your own Anthropic, OpenAI or Gemini key to run prompts in the app. Free Reed and Adzuna keys. Backup and restore. Light and dark mode. |
 | **Build your own** | A complete brief for an AI app builder to make your own version (top bar, sidebar, Home, Settings). |
 
 ## Privacy
 
-There's no account and no database: everything is stored in the browser's `localStorage`. API keys stay in the browser. They're sent only with the request that uses them, and are never stored or logged on the server. Backups leave the keys out.
+There's no account. Everything is stored in the browser's `localStorage`. API keys stay in the browser. They're sent only with the request that uses them, and are never stored or logged on the server. Backups leave the keys out.
 
 ## Server routes
 
@@ -43,4 +43,12 @@ npm test
 
 ## Deploy to Vercel
 
-Import the repo in Vercel and deploy. No environment variables are needed.
+1. Import the repo in Vercel and deploy. The app works straight away, with data saved in the browser.
+2. **Optional but recommended: sync across devices.** In the Vercel project, open **Storage → Create Database → Neon** (free) and connect it to the project. That sets `DATABASE_URL`. **Redeploy.** The table is created automatically the first time it's used.
+3. On her phone or laptop: **Settings → Sync across your devices → Turn on sync**. She'll get a private code; she enters it on her other device.
+
+Sync details: there are no accounts. The private code identifies her data, and the database stores only a hash of it. API keys are removed before anything is saved. Saves are conflict-safe: if two devices change things at once, both changes are kept and the newer copy of each item wins.
+
+## Live source check
+
+`.github/workflows/check-sources.yml` runs the real job feeds and careers-page readers through the app's own code on every push and every Monday. If a site changes its format, it shows up there. Add `REED_API_KEY`, `ADZUNA_APP_ID` and `ADZUNA_APP_KEY` as repository secrets to include those sources too.
