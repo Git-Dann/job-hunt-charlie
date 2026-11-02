@@ -75,9 +75,9 @@ export const CompanyCard = ({ company = "", jobId }: { company?: string; jobId?:
                         )}
                     </p>
                 )}
-                {needsKey && (
+                {error && (
                     <Button size="sm" color="link-color" href={publicSearch} target="_blank" rel="noreferrer" iconTrailing={LinkExternal01} className="self-start">
-                        Or look it up on Companies House
+                        Search Companies House directly
                     </Button>
                 )}
                 {matches && !profile && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BellRinging03, ChevronDown, RefreshCw01, Trash01 } from "@untitledui/icons";
+import { BellRinging03, ChevronDown, LinkExternal01, RefreshCw01, Trash01 } from "@untitledui/icons";
 import { Badge } from "@/components/base/badges/badges";
 import { Button } from "@/components/base/buttons/button";
 import { Toggle } from "@/components/base/toggle/toggle";
@@ -60,6 +60,17 @@ export const AlertsCard = ({ onLoad }: { onLoad: (s: SavedSearch) => void }) => 
                                                   ? `Checked ${timeAgo(s.lastCheckedAt).toLowerCase()}${s.urls.length ? ` · includes ${s.urls.length} careers page${s.urls.length === 1 ? "" : "s"}` : ""}`
                                                   : "First check happens shortly"}
                                     </p>
+                                    {s.alerts && s.lastError && s.urls.length > 0 && (
+                                        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                                            {s.urls
+                                                .filter((u) => s.lastError!.includes(u.replace(/^https?:\/\//, "")))
+                                                .map((u) => (
+                                                    <a key={u} href={u} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-brand-secondary underline max-sm:min-h-10">
+                                                        Open {u.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]} <LinkExternal01 className="size-3" aria-hidden />
+                                                    </a>
+                                                ))}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                     <Toggle size="sm" label="Alerts" isSelected={!!s.alerts} onChange={(on) => updateSearch(s.id, (x) => ({ ...x, alerts: on }))} />

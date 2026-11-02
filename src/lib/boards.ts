@@ -164,3 +164,19 @@ export function boardUrl(b: Board, s: BoardSearch): string {
 }
 
 export const CAREERS_SITES_HOME = "https://www.google.com/search?q=site%3Aboards.greenhouse.io+OR+site%3Ajobs.lever.co+OR+site%3Ajobs.ashbyhq.com&tbs=qdr:w";
+
+/** The website for each live source, so a source that can't be read can still be opened directly. */
+export function sourceSiteUrl(sourceId: string, s: BoardSearch): string {
+    const k = q(s.keywords);
+    const board = BOARDS.find((b) => b.id === sourceId);
+    if (board) return boardUrl(board, s);
+    const sites: Record<string, string> = {
+        adzuna: `https://www.adzuna.co.uk/jobs/search?q=${k}&w=${q(s.location)}`,
+        jobicy: `https://jobicy.com/?search_keywords=${k}`,
+        himalayas: `https://himalayas.app/jobs?q=${k}`,
+        remoteok: `https://remoteok.com/?search=${k}`,
+        themuse: `https://www.themuse.com/search/keyword/${k}`,
+        arbeitnow: `https://www.arbeitnow.com/?search=${k}`,
+    };
+    return sites[sourceId] ?? `https://www.google.com/search?q=${q(`${s.keywords} jobs ${s.location}`)}&ibp=htl;jobs`;
+}

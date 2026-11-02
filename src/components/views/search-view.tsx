@@ -28,7 +28,7 @@ import { AlertsCard } from "@/components/app/alerts-card";
 import { JobCard } from "@/components/app/job-card";
 import { checkAlerts } from "@/lib/alert-runner";
 import { Card, CardHeader, Page, PageHeader } from "@/components/app/page-header";
-import { BOARDS, CAREERS_SITES_HOME, atsGoogleSearch, boardUrl } from "@/lib/boards";
+import { BOARDS, CAREERS_SITES_HOME, atsGoogleSearch, boardUrl, sourceSiteUrl } from "@/lib/boards";
 import { profileToText } from "@/lib/cv";
 import { matchKeywords } from "@/lib/keywords";
 import { listingMatches } from "@/lib/search-filter";
@@ -317,7 +317,11 @@ export const SearchView = () => {
                     </Card>
 
                     {liveError && <Notice tone="error">{liveError}</Notice>}
-                    {liveStatus.length > 0 && <StatusList items={liveStatus.map((s) => ({ key: s.source, label: s.label, ok: s.ok, count: s.count, error: s.error, note: s.skipped }))} />}
+                    {liveStatus.length > 0 && (
+                        <StatusList
+                            items={liveStatus.map((s) => ({ key: s.source, label: s.label, ok: s.ok, count: s.count, error: s.error, note: s.skipped, href: !s.ok || s.skipped ? sourceSiteUrl(s.source, boardQuery) : undefined }))}
+                        />
+                    )}
 
                     {live && (
                         <ResultList
@@ -373,7 +377,9 @@ export const SearchView = () => {
 
                     {pageError && <Notice tone="error">{pageError}</Notice>}
                     {pageStatus.length > 0 && (
-                        <StatusList items={pageStatus.map((p) => ({ key: p.url, label: p.url.replace(/^https?:\/\/(www\.)?/, ""), ok: p.ok, count: p.count, error: p.error, note: p.ok ? p.method : undefined }))} />
+                        <StatusList
+                            items={pageStatus.map((p) => ({ key: p.url, label: p.url.replace(/^https?:\/\/(www\.)?/, ""), ok: p.ok, count: p.count, error: p.error, note: p.ok ? p.method : undefined, href: p.url }))}
+                        />
                     )}
                     {pageJobs && (
                         <ResultList
@@ -400,33 +406,59 @@ const Notice = ({ tone, children }: { tone: "error" | "info"; children: React.Re
     </div>
 );
 
-const StatusList = ({ items }: { items: { key: string; label: string; ok: boolean; count: number; error?: string; note?: string }[] }) => (
-    <details className="mt-4 rounded-xl border border-secondary bg-primary" open={items.some((i) => !i.ok)}>
-        <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-secondary md:px-6">
-            Where these came from · {items.filter((i) => i.ok && !i.note?.startsWith("Add")).length} of {items.length} answered
-        </summary>
-        <ul className="divide-y divide-secondary border-t border-secondary">
-            {items.map((i) => (
-                <li key={i.key} className="flex items-start gap-3 px-4 py-3 text-sm md:px-6">
-                    {i.ok ? (
-                        <CheckCircle className="mt-0.5 size-4 shrink-0 text-fg-success-primary" aria-hidden />
-                    ) : (
-                        <AlertCircle className="mt-0.5 size-4 shrink-0 text-fg-error-primary" aria-hidden />
-                    )}
-                    <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-secondary">{i.label}</p>
-                        {(i.error || i.note) && <p className="text-tertiary">{i.error ?? i.note}</p>}
-                    </div>
-                    {i.ok && (
-                        <Badge size="sm" color={i.count ? "success" : "gray"}>
-                            {i.count}
-                        </Badge>
-                    )}
-                </li>
-            ))}
-        </ul>
-    </details>
-);
+interface StatusItem {
+    key: string;
+    label: string;
+    ok: boolean;
+    count: number;
+    error?: string;
+    note?: string;
+    /** Where to send her if this couldn't be read: the site itself. */
+    href?: string;
+}
+
+/** Each source or page and how it went. Anything that couldn't be read gets a link to open it directly. */
+const StatusList = ({ items }: { items: StatusItem[] }) => {
+    const unread = items.filter((i) => !i.ok || i.note?.startsWith("Add") || (i.count === 0 && i.href));
+    return (
+        <details className="mt-4 rounded-xl border border-secondary bg-primary" open={items.some((i) => !i.ok)}>
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-secondary md:px-6">
+                Where these came from · {items.filter((i) => i.ok && !i.note?.startsWith("Add")).length} of {items.length} answered
+                {unread.length > 0 && <span className="font-normal text-tertiary"> · {unread.length} to open directly</span>}
+            </summary>
+            <ul className="divide-y divide-secondary border-t border-secondary">
+                {items.map((i) => {
+                    const needsLink = Boolean(i.href) && (!i.ok || i.note?.startsWith("Add") || i.count === 0);
+                    return (
+                        <li key={i.key} className="flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-start sm:gap-3 md:px-6">
+                            <div className="flex min-w-0 flex-1 items-start gap-3">
+                                {i.ok ? (
+                                    <CheckCircle className="mt-0.5 size-4 shrink-0 text-fg-success-primary" aria-hidden />
+                                ) : (
+                                    <AlertCircle className="mt-0.5 size-4 shrink-0 text-fg-error-primary" aria-hidden />
+                                )}
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate font-medium text-secondary">{i.label}</p>
+                                    {(i.error || i.note) && <p className="text-tertiary">{needsLink ? (i.error ?? i.note)?.replace(/ (Use|try) the .*$/i, "") : (i.error ?? i.note)}</p>}
+                                </div>
+                                {i.ok && !needsLink && (
+                                    <Badge size="sm" color={i.count ? "success" : "gray"}>
+                                        {i.count}
+                                    </Badge>
+                                )}
+                            </div>
+                            {needsLink && i.href && (
+                                <Button size="sm" color="secondary" href={i.href} target="_blank" rel="noreferrer" iconTrailing={LinkExternal01} className="shrink-0 self-start sm:ml-auto">
+                                    {i.key.startsWith("http") ? "Open page" : "Open site"}
+                                </Button>
+                            )}
+                        </li>
+                    );
+                })}
+            </ul>
+        </details>
+    );
+};
 
 const ResultList = ({
     jobs,

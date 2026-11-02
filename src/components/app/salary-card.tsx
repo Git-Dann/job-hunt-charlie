@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CurrencyPound, Stars02 } from "@untitledui/icons";
+import { CurrencyPound, LinkExternal01, Stars02 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { Card, CardHeader } from "@/components/app/page-header";
@@ -61,6 +61,19 @@ export const SalaryCard = ({ title = "", location = "", advertised, jobId }: { t
                 <Button color="secondary" isLoading={loading} isDisabled={!what.trim()} onClick={run}>
                     Check salaries
                 </Button>
+                {error && (
+                    <Button
+                        size="sm"
+                        color="link-color"
+                        className="self-start"
+                        href={`https://www.google.com/search?q=${encodeURIComponent(`${what} salary ${where} UK`)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        iconTrailing={LinkExternal01}
+                    >
+                        Search salaries online instead
+                    </Button>
+                )}
                 {error && (
                     <p role="alert" className="text-sm text-tertiary">
                         {error}{" "}

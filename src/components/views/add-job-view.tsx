@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Bookmark, Link01, RefreshCw01 } from "@untitledui/icons";
+import { Bookmark, Link01, LinkExternal01, RefreshCw01 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { NativeSelect } from "@/components/base/select/select-native";
@@ -44,10 +44,10 @@ export const AddJobView = () => {
             } else if (body.jobs?.length > 1) {
                 setNote(`That page lists ${body.jobs.length} jobs. Open the specific job and use its link, or fill in the details below.`);
             } else {
-                setNote(page?.error ? `Couldn't read the details automatically (${page.error.replace(/ Use the .*$/, "")}). Fill them in below — pasting the description is enough.` : "Couldn't read the details automatically. Fill them in below.");
+                setNote(page?.error ? `Couldn't read the details automatically (${page.error.replace(/ (Use|try) the .*$/i, "")}). Open the job page and copy the description into the box below.` : "Couldn't read the details automatically. Open the job page and copy the description into the box below.");
             }
         } catch {
-            setNote("Couldn't read the details automatically. Fill them in below.");
+            setNote("Couldn't read the details automatically. Open the job page and copy the description into the box below.");
         } finally {
             setReading(false);
         }
@@ -85,9 +85,14 @@ export const AddJobView = () => {
                         </Button>
                     </div>
                     {note && (
-                        <p role="status" className="rounded-lg bg-secondary p-3 text-sm text-secondary">
-                            {note}
-                        </p>
+                        <div role="status" className="flex flex-col gap-3 rounded-lg bg-secondary p-3 text-sm text-secondary sm:flex-row sm:items-center">
+                            <p className="flex-1">{note}</p>
+                            {!note.startsWith("Details read") && form.url && (
+                                <Button size="sm" color="secondary" href={normaliseUrl(form.url)} target="_blank" rel="noreferrer" iconTrailing={LinkExternal01} className="shrink-0">
+                                    Open the job page
+                                </Button>
+                            )}
+                        </div>
                     )}
                     {duplicate && (
                         <p className="rounded-lg bg-warning-primary p-3 text-sm text-warning-primary">
