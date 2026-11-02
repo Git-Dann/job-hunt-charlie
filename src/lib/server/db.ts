@@ -6,7 +6,18 @@ import { Pool } from "pg";
  * other Postgres (Supabase, Railway, a local one).
  */
 
-export const databaseUrl = () => process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+/**
+ * Vercel's Neon integration names the variable DATABASE_URL, POSTGRES_URL, or — if a custom prefix was
+ * chosen when connecting — e.g. STORAGE_DATABASE_URL. Accept any of them, preferring the pooled ones.
+ */
+export function databaseUrl(env: Record<string, string | undefined> = process.env): string {
+    const direct = env.DATABASE_URL || env.POSTGRES_URL;
+    if (direct) return direct;
+    const key = Object.keys(env)
+        .filter((k) => /(^|_)(DATABASE_URL|POSTGRES_URL)$/.test(k) && env[k])
+        .sort()[0];
+    return key ? env[key]! : "";
+}
 export const isDbConfigured = () => Boolean(databaseUrl());
 
 declare global {
