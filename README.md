@@ -1,4 +1,4 @@
-# Job Hunt
+# Charlie's Job Platform
 
 A personal job-hunting portal, built mobile-first on [Untitled UI React](https://www.untitledui.com/react) (MIT) and `@untitledui/icons`.
 

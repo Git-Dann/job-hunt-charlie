@@ -58,7 +58,7 @@ export const HomeView = () => {
     return (
         <Page>
             <div className="flex flex-col gap-1">
-                <h1 className="text-display-xs font-semibold text-primary md:text-display-sm">{hydrated && firstName ? `Hi ${firstName} 👋` : "Welcome 👋"}</h1>
+                <h1 className="text-display-xs font-semibold text-primary md:text-display-sm">{`Welcome, ${(hydrated && firstName) || "Charlie"} 👋`}</h1>
                 <p className="text-md text-tertiary">Everything for your job hunt in one place. It all saves on this device.</p>
             </div>
 

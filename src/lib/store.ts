@@ -1,60 +1,22 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { AppData, Profile } from "./types";
+import { emptyData, normaliseData } from "./store-normalise";
+import type { AppData } from "./types";
 
 export const STORAGE_KEY = "jobhunt.data.v1";
 
-export const emptyProfile = (): Profile => ({
-    name: "",
-    headline: "",
-    email: "",
-    phone: "",
-    location: "",
-    linkedin: "",
-    website: "",
-    summary: "",
-    skills: [],
-    experience: [],
-    education: [],
-    certifications: [],
-    extras: "",
-    targetRoles: "",
-    targetLocation: "",
-    salaryExpectation: "",
-    workPreference: "any",
-});
-
-export const emptyData = (): AppData => ({
-    version: 1,
-    profile: emptyProfile(),
-    jobs: [],
-    cvs: [],
-    searches: [],
-    ai: { provider: null, apiKey: "", model: "" },
-    keys: { reedApiKey: "", adzunaAppId: "", adzunaAppKey: "", adzunaCountry: "gb" },
-    onboarded: false,
-});
-
-/** Fill in anything missing from older or hand-edited data, so the app never reads `undefined`. */
-export function normaliseData(raw: unknown): AppData {
-    const base = emptyData();
-    if (!raw || typeof raw !== "object") return base;
-    const r = raw as Partial<AppData>;
-    return {
-        version: 1,
-        profile: { ...base.profile, ...(r.profile ?? {}) },
-        jobs: Array.isArray(r.jobs) ? r.jobs : [],
-        cvs: Array.isArray(r.cvs) ? r.cvs : [],
-        searches: Array.isArray(r.searches) ? r.searches : [],
-        ai: { ...base.ai, ...(r.ai ?? {}) },
-        keys: { ...base.keys, ...(r.keys ?? {}) },
-        onboarded: Boolean(r.onboarded),
-    };
-}
+export { emptyData, emptyProfile, normaliseData } from "./store-normalise";
 
 let cache: AppData | null = null;
 const listeners = new Set<() => void>();
+const changeListeners = new Set<(fromSync: boolean) => void>();
+
+/** Called after every change, so cloud sync can save it. `fromSync` marks changes that came from the cloud. */
+export function onDataChange(listener: (fromSync: boolean) => void) {
+    changeListeners.add(listener);
+    return () => changeListeners.delete(listener);
+}
 
 function read(): AppData {
     if (cache) return cache;
@@ -73,8 +35,28 @@ export function getData(): AppData {
     return typeof window === "undefined" ? SERVER_SNAPSHOT : read();
 }
 
-export function setData(update: (d: AppData) => AppData) {
-    const next = update(read());
+/**
+ * Stamp `updatedAt` on whatever this change touched. Updates are immutable, so a changed item is
+ * simply a new object. Sync uses the stamps to keep the newer copy when two devices disagree.
+ */
+export function stampChanges(prev: AppData, next: AppData, now: string): AppData {
+    const stamp = <T extends { id: string; updatedAt?: string }>(before: T[], after: T[]): T[] => {
+        const old = new Map(before.map((x) => [x.id, x]));
+        return after.map((x) => (old.get(x.id) === x ? x : { ...x, updatedAt: now }));
+    };
+    return {
+        ...next,
+        jobs: next.jobs === prev.jobs ? next.jobs : stamp(prev.jobs, next.jobs),
+        cvs: next.cvs === prev.cvs ? next.cvs : stamp(prev.cvs, next.cvs),
+        searches: next.searches === prev.searches ? next.searches : stamp(prev.searches, next.searches),
+        profile: next.profile === prev.profile ? next.profile : { ...next.profile, updatedAt: now },
+    };
+}
+
+export function setData(update: (d: AppData) => AppData, opts: { fromSync?: boolean } = {}) {
+    const prev = read();
+    const changed = update(prev);
+    const next = opts.fromSync ? changed : stampChanges(prev, changed, new Date().toISOString());
     cache = next;
     try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -82,6 +64,7 @@ export function setData(update: (d: AppData) => AppData) {
         // Storage full or blocked: keep working in memory for this visit.
     }
     listeners.forEach((l) => l());
+    changeListeners.forEach((l) => l(Boolean(opts.fromSync)));
 }
 
 export function replaceData(data: AppData) {

@@ -10,6 +10,7 @@ import { ThemeSwitch } from "@/components/app/theme-switch";
 import { cx } from "@/utils/cx";
 import { BuildYourOwnDialog } from "./build-your-own-dialog";
 import { AppLogo } from "./logo";
+import { SyncIndicator, SyncManager } from "./sync-status";
 import { NAV, SETTINGS_NAV, isActive } from "./nav";
 
 export const AppShell = ({ children }: { children: ReactNode }) => {
@@ -17,6 +18,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
 
     return (
         <div className="flex min-h-dvh flex-col bg-primary lg:flex-row">
+            <SyncManager />
             {/* Desktop sidebar (Untitled UI sidebar pattern) */}
             <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-secondary bg-primary lg:flex">
                 <div className="px-5 pt-6 pb-5">
@@ -53,18 +55,19 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
                         </li>
                     </ul>
                     <ThemeSwitch />
+                    <SyncIndicator className="px-1" />
                 </div>
             </aside>
 
             {/* Mobile top bar */}
-            <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-secondary bg-primary/95 px-4 backdrop-blur pt-[env(safe-area-inset-top)] box-content lg:hidden">
-                <AriaLink href="/" aria-label="Home" className="rounded-md outline-focus-ring focus-visible:outline-2">
+            <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-secondary bg-primary/95 px-4 backdrop-blur pt-[env(safe-area-inset-top)] box-content lg:hidden">
+                <AriaLink href="/" aria-label="Home" className="min-w-0 rounded-md outline-focus-ring focus-visible:outline-2">
                     <AppLogo />
                 </AriaLink>
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1">
                     <BuildYourOwnDialog>
                         <Button size="sm" color="tertiary" iconLeading={Code02} aria-label="Build your own">
-                            <span className="max-[380px]:sr-only">Build your own</span>
+                            <span className="sr-only">Build your own</span>
                         </Button>
                     </BuildYourOwnDialog>
                     <AriaLink
@@ -100,7 +103,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
                                         active ? "text-brand-secondary" : "text-quaternary",
                                     )}
                                 >
-                                    <span className={cx("flex h-7 w-12 items-center justify-center rounded-full transition", active && "bg-brand-primary")}>
+                                    <span className={cx("flex h-7 w-12 items-center justify-center rounded-full transition", active && "bg-brand-primary_alt")}>
                                         <item.icon className={cx("size-5", active ? "text-fg-brand-primary" : "text-fg-quaternary")} />
                                     </span>
                                     {item.short}

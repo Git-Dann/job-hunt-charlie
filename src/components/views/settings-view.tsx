@@ -8,6 +8,7 @@ import { Input } from "@/components/base/input/input";
 import { NativeSelect } from "@/components/base/select/select-native";
 import { BuildYourOwnDialog } from "@/components/app/build-your-own-dialog";
 import { Card, CardHeader, Page, PageHeader } from "@/components/app/page-header";
+import { SyncCard } from "@/components/app/sync-card";
 import { ThemeSwitch } from "@/components/app/theme-switch";
 import { AI_PROVIDERS, defaultModel } from "@/lib/ai-models";
 import { STORAGE_KEY, emptyData, normaliseData, replaceData, setData, useAppData, useHydrated } from "@/lib/store";
@@ -31,7 +32,7 @@ export const SettingsView = () => {
         const blob = new Blob([JSON.stringify(safe, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `job-hunt-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `charlies-job-platform-backup-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(a.href);
     };
@@ -47,7 +48,7 @@ export const SettingsView = () => {
             replaceData(next);
             setImportMsg(`Restored ${next.jobs.length} jobs and ${next.cvs.length} CVs.`);
         } catch {
-            setImportMsg("That file isn't a Job Hunt backup.");
+            setImportMsg("That file isn't a backup from Charlie's Job Platform.");
         }
     };
 
@@ -57,6 +58,8 @@ export const SettingsView = () => {
         <Page>
             <PageHeader title="Settings" description="Connections, backups and appearance. Everything is stored on this device only." />
             <div className="mt-6 flex max-w-3xl flex-col gap-6">
+                <SyncCard />
+
                 <Card>
                     <div id="ai" className="scroll-mt-20" />
                     <CardHeader

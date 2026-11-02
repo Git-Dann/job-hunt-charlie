@@ -1,0 +1,27 @@
+name: Check job sources
+
+# Calls every live job source with the app's own parsers, so a site changing its format is caught.
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 7 * * 1"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npx tsc --noEmit
+      - run: npx tsx scripts/check-sources.ts
+        env:
+          REED_API_KEY: ${{ secrets.REED_API_KEY }}
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}

@@ -33,6 +33,8 @@ export interface TrackedJob extends JobListing {
     contact?: string;
     nextStep?: string;
     nextStepDate?: string;
+    /** Set automatically on every change; lets sync keep the newer copy. */
+    updatedAt?: string;
 }
 
 export interface Experience {
@@ -73,6 +75,7 @@ export interface Profile {
     targetLocation: string;
     salaryExpectation: string;
     workPreference: "any" | "remote" | "hybrid" | "office";
+    updatedAt?: string;
 }
 
 /** A CV tailored to a role: which bits of the profile to use and how to order them. */
@@ -98,6 +101,7 @@ export interface SavedSearch {
     location: string;
     remoteOnly: boolean;
     urls: string[];
+    updatedAt?: string;
 }
 
 export type AiProvider = "anthropic" | "openai" | "gemini";

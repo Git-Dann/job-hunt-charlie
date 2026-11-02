@@ -27,7 +27,7 @@ import { Toggle } from "@/components/base/toggle/toggle";
 import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-icon";
 import { JobCard } from "@/components/app/job-card";
 import { Card, CardHeader, Page, PageHeader } from "@/components/app/page-header";
-import { BOARDS, atsGoogleSearch } from "@/lib/boards";
+import { BOARDS, CAREERS_SITES_HOME, atsGoogleSearch, boardUrl } from "@/lib/boards";
 import { profileToText } from "@/lib/cv";
 import { matchKeywords } from "@/lib/keywords";
 import { listingMatches } from "@/lib/search-filter";
@@ -73,6 +73,15 @@ export const SearchView = () => {
     const [location, setLocation] = useState(params.get("l") ?? "");
     const [remoteOnly, setRemoteOnly] = useState(params.get("remote") === "1");
     const [tab, setTab] = useState<string>("boards");
+    const [needKeywords, setNeedKeywords] = useState(false);
+    /** Board buttons are never disabled: with nothing typed, take her to the box that's missing. */
+    const askForKeywords = () => {
+        setNeedKeywords(true);
+        const input = document.querySelector<HTMLInputElement>('input[name="what"]');
+        input?.scrollIntoView({ behavior: "smooth", block: "center" });
+        input?.focus({ preventScroll: true });
+    };
+    const hasKeywords = keywords.trim().length > 0;
 
     // Fill from her goals once the store has loaded, if nothing came in the URL.
     useEffect(() => {
@@ -94,7 +103,7 @@ export const SearchView = () => {
     const [liveError, setLiveError] = useState("");
 
     const runLive = async () => {
-        if (!keywords.trim()) return setLiveError("Type a job title or keywords first.");
+        if (!keywords.trim()) return askForKeywords();
         setLiveLoading(true);
         setLiveError("");
         try {
@@ -150,7 +159,10 @@ export const SearchView = () => {
     );
 
     // ── Saved searches ──
+    const [saved, setSaved] = useState(false);
     const saveSearch = () => {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
         const name = [keywords || "Any role", remoteOnly ? "Remote" : location].filter(Boolean).join(" · ");
         setData((d) => ({ ...d, searches: [{ id: uid(), name, keywords, location, remoteOnly, urls }, ...d.searches.filter((s) => s.name !== name)].slice(0, 20) }));
     };
@@ -169,23 +181,41 @@ export const SearchView = () => {
         <Page>
             <PageHeader title="Find jobs" description="Search the big boards, pull live listings, or check company careers pages directly." />
 
-            <div className="mt-6 rounded-xl border border-secondary bg-secondary p-4 md:p-5">
+            <form
+                className="mt-6 rounded-xl border border-secondary bg-secondary p-4 md:p-5"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!hasKeywords) return askForKeywords();
+                    setTab("live");
+                    void runLive();
+                }}
+            >
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_16rem]">
                     <Input
                         label="What"
+                        name="what"
                         placeholder="e.g. marketing manager, events"
                         icon={SearchLg}
                         value={keywords}
-                        onChange={setKeywords}
-                        hint="Separate alternatives with commas."
+                        onChange={(v) => {
+                            setKeywords(v);
+                            if (v.trim()) setNeedKeywords(false);
+                        }}
+                        isInvalid={needKeywords && !hasKeywords}
+                        hint={needKeywords && !hasKeywords ? "Type a job title or keywords first, then pick a board." : "Separate alternatives with commas."}
                     />
                     <Input label="Where" placeholder="e.g. Manchester" icon={MarkerPin01} value={location} onChange={setLocation} isDisabled={remoteOnly} />
                 </div>
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <Toggle label="Remote only" isSelected={remoteOnly} onChange={setRemoteOnly} />
-                    <Button size="sm" color="tertiary" iconLeading={BookmarkAdd} onClick={saveSearch} isDisabled={!keywords.trim()}>
-                        Save this search
-                    </Button>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
+                        <Button type="button" color="secondary" iconLeading={saved ? undefined : BookmarkAdd} onClick={() => (hasKeywords ? saveSearch() : askForKeywords())}>
+                            {saved ? "Saved ✓" : "Save this search"}
+                        </Button>
+                        <Button type="submit" iconLeading={SearchLg} isLoading={liveLoading}>
+                            Search
+                        </Button>
+                    </div>
                 </div>
                 {hydrated && searches.length > 0 && (
                     <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-secondary pt-4">
@@ -207,7 +237,7 @@ export const SearchView = () => {
                         ))}
                     </div>
                 )}
-            </div>
+            </form>
 
             <Tabs selectedKey={tab} onSelectionChange={(k) => setTab(String(k))} className="mt-6">
                 <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
@@ -221,16 +251,16 @@ export const SearchView = () => {
                 {/* ── Job boards ── */}
                 <Tabs.Panel id="boards" className="mt-5">
                     <p className="mb-4 text-sm text-tertiary">
-                        One tap opens your search on each board. These are the boards&rsquo; own results, so they&rsquo;re always complete and up to date.
+                        Each button opens that site in a new tab. Type a job title above first and it opens straight onto your search results.
                     </p>
-                    <div className="mb-4 rounded-xl border border-brand bg-brand-primary p-4">
+                    <div className="mb-4 rounded-xl border border-secondary bg-brand-primary_alt p-4">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                             <FeaturedIcon icon={Stars02} color="brand" theme="light" size="md" />
                             <div className="min-w-0 flex-1">
                                 <p className="text-sm font-semibold text-primary">Hidden gem: search company careers sites directly</p>
                                 <p className="text-sm text-tertiary">Finds roles posted on companies&rsquo; own hiring pages from the last week — often before they hit the big boards.</p>
                             </div>
-                            <Button size="sm" href={atsGoogleSearch(boardQuery)} target="_blank" rel="noreferrer" iconTrailing={LinkExternal01} isDisabled={!keywords.trim()}>
+                            <Button size="sm" href={hasKeywords ? atsGoogleSearch(boardQuery) : CAREERS_SITES_HOME} target="_blank" rel="noreferrer" iconTrailing={LinkExternal01}>
                                 Search careers sites
                             </Button>
                         </div>
@@ -245,17 +275,8 @@ export const SearchView = () => {
                                     </Badge>
                                 </div>
                                 <p className="mt-1 flex-1 text-sm text-tertiary">{b.note}</p>
-                                <Button
-                                    size="sm"
-                                    color="secondary"
-                                    className="mt-3"
-                                    href={b.build(boardQuery)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    iconTrailing={LinkExternal01}
-                                    isDisabled={!keywords.trim()}
-                                >
-                                    Search {b.name.split(" ")[0]}
+                                <Button size="sm" color="secondary" className="mt-3" href={boardUrl(b, boardQuery)} target="_blank" rel="noreferrer" iconTrailing={LinkExternal01}>
+                                    {hasKeywords ? `Search ${b.short}` : `Open ${b.short}`}
                                 </Button>
                             </li>
                         ))}
