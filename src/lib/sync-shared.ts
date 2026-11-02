@@ -48,6 +48,7 @@ export function mergeData(local: AppData, cloud: AppData): AppData {
         jobs: mergeById(local.jobs, cloud.jobs),
         cvs: mergeById(local.cvs, cloud.cvs),
         searches: mergeById(local.searches, cloud.searches),
+        answers: mergeById(local.answers, cloud.answers),
         profile: {
             // The newer profile wins field by field, with gaps filled from the other copy.
             ...other,

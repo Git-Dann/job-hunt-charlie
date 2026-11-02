@@ -10,6 +10,7 @@ import { ProgressBar } from "@/components/base/progress-indicators/progress-indi
 import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-icon";
 import { BuildYourOwnDialog } from "@/components/app/build-your-own-dialog";
 import { Card, CardHeader, Page } from "@/components/app/page-header";
+import { newCount } from "@/lib/alerts";
 import { profileCompleteness } from "@/lib/cv";
 import { formatDate } from "@/lib/jobs";
 import { useAppData, useHydrated } from "@/lib/store";
@@ -31,6 +32,7 @@ export const HomeView = () => {
     const [keywords, setKeywords] = useState("");
     const [location, setLocation] = useState("");
     const completeness = profileCompleteness(profile);
+    const newJobsTotal = newCount(data.searches);
     const firstName = profile.name.trim().split(" ")[0];
 
     const counts = Object.fromEntries(JOB_STATUSES.map((s) => [s.id, jobs.filter((j) => j.status === s.id).length]));
@@ -104,6 +106,31 @@ export const HomeView = () => {
 
             <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div className="flex flex-col gap-6 lg:col-span-2">
+                    {hydrated && newJobsTotal > 0 && (
+                        <Card>
+                            <CardHeader
+                                title={`${newJobsTotal} new job${newJobsTotal === 1 ? "" : "s"} for you`}
+                                description="Found by your job alerts since you last looked."
+                                actions={
+                                    <Button size="sm" href="/search#alerts" iconTrailing={ArrowRight}>
+                                        See them
+                                    </Button>
+                                }
+                            />
+                            <ul className="divide-y divide-secondary">
+                                {data.searches
+                                    .filter((s) => s.alerts && s.newJobs?.length)
+                                    .map((s) => (
+                                        <li key={s.id} className="flex items-center justify-between gap-3 px-4 py-3 md:px-6">
+                                            <span className="truncate text-sm font-medium text-secondary">{s.name}</span>
+                                            <Badge size="sm" color="brand">
+                                                {s.newJobs!.length} new
+                                            </Badge>
+                                        </li>
+                                    ))}
+                            </ul>
+                        </Card>
+                    )}
                     {showSteps && (
                         <Card>
                             <CardHeader title="Get set up" description="Four quick steps to get the most out of this." />

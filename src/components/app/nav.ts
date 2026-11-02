@@ -1,4 +1,4 @@
-import { Briefcase01, File06, Home03, SearchLg, Settings01, Stars02 } from "@untitledui/icons";
+import { Briefcase01, File06, Home03, MessageTextSquare02, SearchLg, Settings01, Stars02 } from "@untitledui/icons";
 import type { FC } from "react";
 
 export interface AppNavItem {
@@ -13,6 +13,7 @@ export const NAV: AppNavItem[] = [
     { href: "/search", label: "Find jobs", short: "Find", icon: SearchLg },
     { href: "/jobs", label: "My applications", short: "Jobs", icon: Briefcase01 },
     { href: "/cv", label: "CV builder", short: "CV", icon: File06 },
+    { href: "/answers", label: "Answer bank", short: "Answers", icon: MessageTextSquare02 },
     { href: "/prompts", label: "AI prompts", short: "Prompts", icon: Stars02 },
 ];
 

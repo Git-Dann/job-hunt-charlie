@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
     AlertCircle,
+    BellRinging03,
     BookmarkAdd,
     CheckCircle,
     Globe02,
@@ -25,7 +26,9 @@ import { NativeSelect } from "@/components/base/select/select-native";
 import { TextArea } from "@/components/base/textarea/textarea";
 import { Toggle } from "@/components/base/toggle/toggle";
 import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-icon";
+import { AlertsCard } from "@/components/app/alerts-card";
 import { JobCard } from "@/components/app/job-card";
+import { checkAlerts } from "@/lib/alert-runner";
 import { Card, CardHeader, Page, PageHeader } from "@/components/app/page-header";
 import { BOARDS, CAREERS_SITES_HOME, atsGoogleSearch, boardUrl } from "@/lib/boards";
 import { profileToText } from "@/lib/cv";
@@ -164,11 +167,14 @@ export const SearchView = () => {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
         const name = [keywords || "Any role", remoteOnly ? "Remote" : location].filter(Boolean).join(" · ");
-        setData((d) => ({ ...d, searches: [{ id: uid(), name, keywords, location, remoteOnly, urls }, ...d.searches.filter((s) => s.name !== name)].slice(0, 20) }));
+        setData((d) => {
+            const existing = d.searches.find((s) => s.name === name);
+            const next = existing ? { ...existing, keywords, location, remoteOnly, urls: urls.length ? urls : existing.urls, alerts: true } : { id: uid(), name, keywords, location, remoteOnly, urls, alerts: true };
+            return { ...d, searches: [next, ...d.searches.filter((s) => s.id !== next.id)].slice(0, 20) };
+        });
+        setTimeout(() => void checkAlerts(), 300);
     };
-    const loadSearch = (id: string) => {
-        const s = searches.find((x) => x.id === id);
-        if (!s) return;
+    const loadSearch = (s: (typeof searches)[number]) => {
         setKeywords(s.keywords);
         setLocation(s.location);
         setRemoteOnly(s.remoteOnly);
@@ -209,35 +215,17 @@ export const SearchView = () => {
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <Toggle label="Remote only" isSelected={remoteOnly} onChange={setRemoteOnly} />
                     <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
-                        <Button type="button" color="secondary" iconLeading={saved ? undefined : BookmarkAdd} onClick={() => (hasKeywords ? saveSearch() : askForKeywords())}>
-                            {saved ? "Saved ✓" : "Save this search"}
+                        <Button type="button" color="secondary" iconLeading={saved ? undefined : BellRinging03} onClick={() => (hasKeywords ? saveSearch() : askForKeywords())}>
+                            {saved ? "Saved — alerts on ✓" : "Save & get alerts"}
                         </Button>
                         <Button type="submit" iconLeading={SearchLg} isLoading={liveLoading}>
                             Search
                         </Button>
                     </div>
                 </div>
-                {hydrated && searches.length > 0 && (
-                    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-secondary pt-4">
-                        <span className="text-xs font-semibold text-tertiary">Saved:</span>
-                        {searches.map((s) => (
-                            <span key={s.id} className="inline-flex items-center overflow-hidden rounded-lg bg-primary text-sm font-medium text-secondary ring-1 ring-primary ring-inset">
-                                <button type="button" className="px-2.5 py-1 outline-focus-ring hover:bg-primary_hover focus-visible:outline-2" onClick={() => loadSearch(s.id)}>
-                                    {s.name}
-                                </button>
-                                <button
-                                    type="button"
-                                    aria-label={`Delete saved search ${s.name}`}
-                                    className="flex h-full items-center border-l border-secondary px-1.5 py-1 text-fg-quaternary outline-focus-ring hover:bg-primary_hover focus-visible:outline-2"
-                                    onClick={() => setData((d) => ({ ...d, searches: d.searches.filter((x) => x.id !== s.id) }))}
-                                >
-                                    <XClose className="size-3.5" />
-                                </button>
-                            </span>
-                        ))}
-                    </div>
-                )}
             </form>
+
+            {hydrated && <AlertsCard onLoad={loadSearch} />}
 
             <Tabs selectedKey={tab} onSelectionChange={(k) => setTab(String(k))} className="mt-6">
                 <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
@@ -364,6 +352,9 @@ export const SearchView = () => {
                                 hint={`${urls.length} link${urls.length === 1 ? "" : "s"} ready`}
                             />
                             <Toggle label="Only show jobs matching my keywords" isSelected={onlyMatching} onChange={setOnlyMatching} />
+                            <p className="text-sm text-tertiary">
+                                Want to hear when these companies post something new? Tap <strong>Save &amp; get alerts</strong> above — the pages are watched along with your search.
+                            </p>
                             <details className="rounded-lg bg-secondary p-3 text-sm text-tertiary">
                                 <summary className="cursor-pointer font-semibold text-secondary">What works best?</summary>
                                 <ul className="mt-2 list-disc space-y-1 pl-5">

@@ -102,6 +102,22 @@ export interface SavedSearch {
     remoteOnly: boolean;
     urls: string[];
     updatedAt?: string;
+    /** Job alerts: re-run in the background and flag jobs she hasn't seen. */
+    alerts?: boolean;
+    lastCheckedAt?: string;
+    /** Ids of every job this search has already shown her (capped). */
+    seenIds?: string[];
+    /** Jobs found since she last looked. */
+    newJobs?: JobListing[];
+    lastError?: string;
+}
+
+/** A saved answer to a question application forms keep asking. */
+export interface SavedAnswer {
+    id: string;
+    question: string;
+    answer: string;
+    updatedAt?: string;
 }
 
 export type AiProvider = "anthropic" | "openai" | "gemini";
@@ -125,6 +141,7 @@ export interface AppData {
     jobs: TrackedJob[];
     cvs: CvVersion[];
     searches: SavedSearch[];
+    answers: SavedAnswer[];
     ai: AiSettings;
     keys: SourceKeys;
     onboarded: boolean;

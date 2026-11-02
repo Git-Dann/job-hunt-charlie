@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, File06, LinkExternal01, Stars02, Trash01, Users01 } from "@untitledui/icons";
+import { ArrowLeft, ArrowRight, File06, LinkExternal01, MessageTextSquare02, Stars02, Trash01, Users01 } from "@untitledui/icons";
 import { Badge } from "@/components/base/badges/badges";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
@@ -156,6 +156,9 @@ export const JobDetailView = ({ id }: { id: string }) => {
                         </ul>
                     </Card>
 
+                    <Button color="secondary" iconLeading={MessageTextSquare02} href={`/answers?job=${job.id}`}>
+                        Answer an application question
+                    </Button>
                     {job.company && (
                         <Button color="secondary" iconLeading={Users01} href={linkedinPeopleSearch(job.company, job.title)} target="_blank" rel="noreferrer">
                             Find people at {job.company}

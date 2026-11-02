@@ -11,14 +11,23 @@ import { cx } from "@/utils/cx";
 import { BuildYourOwnDialog } from "./build-your-own-dialog";
 import { AppLogo } from "./logo";
 import { SyncIndicator, SyncManager } from "./sync-status";
+import { AlertRunner } from "./alert-runner";
+import { newCount } from "@/lib/alerts";
+import { useAppData, useHydrated } from "@/lib/store";
 import { NAV, SETTINGS_NAV, isActive } from "./nav";
 
 export const AppShell = ({ children }: { children: ReactNode }) => {
     const pathname = usePathname();
+    const { searches } = useAppData();
+    const hydrated = useHydrated();
+    const newJobs = hydrated ? newCount(searches) : 0;
+    /** "N new" on Find jobs when alerts have found something. */
+    const badgeFor = (href: string) => (href === "/search" && newJobs > 0 ? newJobs : undefined);
 
     return (
         <div className="flex min-h-dvh flex-col bg-primary lg:flex-row">
             <SyncManager />
+            <AlertRunner />
             {/* Desktop sidebar (Untitled UI sidebar pattern) */}
             <aside className="sticky top-0 hidden h-dvh w-72 shrink-0 flex-col border-r border-secondary bg-primary lg:flex">
                 <div className="px-5 pt-6 pb-5">
@@ -30,7 +39,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
                     <ul className="flex flex-col gap-0.5">
                         {NAV.map((item) => (
                             <li key={item.href}>
-                                <NavItemBase type="link" href={item.href} icon={item.icon} current={isActive(pathname, item.href)}>
+                                <NavItemBase type="link" href={item.href} icon={item.icon} current={isActive(pathname, item.href)} badge={badgeFor(item.href)}>
                                     {item.label}
                                 </NavItemBase>
                             </li>
@@ -90,7 +99,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
                 aria-label="Main"
                 className="fixed inset-x-0 bottom-0 z-30 border-t border-secondary bg-primary/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
             >
-                <ul className="mx-auto grid max-w-lg grid-cols-5">
+                <ul className="mx-auto grid max-w-lg grid-cols-6">
                     {NAV.map((item) => {
                         const active = isActive(pathname, item.href);
                         return (
@@ -99,12 +108,18 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
                                     href={item.href}
                                     aria-current={active ? "page" : undefined}
                                     className={cx(
-                                        "flex h-16 flex-col items-center justify-center gap-1 text-xs font-medium outline-focus-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
+                                        "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium outline-focus-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
                                         active ? "text-brand-secondary" : "text-quaternary",
                                     )}
                                 >
-                                    <span className={cx("flex h-7 w-12 items-center justify-center rounded-full transition", active && "bg-brand-primary_alt")}>
+                                    <span className={cx("relative flex h-7 w-12 items-center justify-center rounded-full transition", active && "bg-brand-primary_alt")}>
                                         <item.icon className={cx("size-5", active ? "text-fg-brand-primary" : "text-fg-quaternary")} />
+                                        {badgeFor(item.href) && (
+                                            <span className="absolute -top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-solid px-1 text-[10px] font-semibold text-white">
+                                                <span className="sr-only">New jobs: </span>
+                                                {badgeFor(item.href)! > 99 ? "99+" : badgeFor(item.href)}
+                                            </span>
+                                        )}
                                     </span>
                                     {item.short}
                                 </AriaLink>
