@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ChevronDown, MessageTextSquare02, Plus, SearchLg, Trash01 } from "@untitledui/icons";
+import { ChevronDown, MessageTextSquare02, Plus, SearchLg, Stars02, Trash01, Upload01 } from "@untitledui/icons";
+import { AppDialog } from "@/components/app/app-dialog";
 import { Badge } from "@/components/base/badges/badges";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
@@ -11,7 +12,7 @@ import { TextArea } from "@/components/base/textarea/textarea";
 import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-icon";
 import { CopyButton } from "@/components/app/copy-button";
 import { Card, CardHeader, Page, PageHeader } from "@/components/app/page-header";
-import { STARTER_QUESTIONS, fillAnswer, intentsOf, matchAnswers, parseLimit, wordCount } from "@/lib/answers";
+import { STARTER_QUESTIONS, fillAnswer, intentsOf, matchAnswers, parseLimit, parseQaPairs, wordCount } from "@/lib/answers";
 import { setData, uid, useAppData, useHydrated } from "@/lib/store";
 import type { SavedAnswer } from "@/lib/types";
 import { cx } from "@/utils/cx";
@@ -56,6 +57,14 @@ export const AnswersView = () => {
             <PageHeader
                 title="Answer bank"
                 description="Write your answers to the questions application forms keep asking — once. Next time, paste the question and your best answer is ready to copy."
+                actions={
+                    <>
+                        <Button color="secondary" iconLeading={Stars02} href="/prompts?p=answer-bank-builder">
+                            Draft them with AI
+                        </Button>
+                        <ImportAnswersDialog />
+                    </>
+                }
             />
 
             <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -211,5 +220,54 @@ const AnswerRow = ({ a, open, onToggle }: { a: SavedAnswer; open: boolean; onTog
                 </div>
             )}
         </li>
+    );
+};
+
+/** Paste the "Fill my answer bank" prompt's output (Q:/A: pairs). Existing questions are updated, new ones added. */
+const ImportAnswersDialog = () => {
+    const [text, setText] = useState("");
+    const pairs = parseQaPairs(text);
+    return (
+        <AppDialog
+            trigger={
+                <Button color="secondary" iconLeading={Upload01}>
+                    Import answers
+                </Button>
+            }
+            icon={Upload01}
+            width="lg"
+            title="Import answers"
+            description={'Paste answers written as "Q: …" and "A: …" — exactly what the "Fill my answer bank" prompt gives you.'}
+            footer={(close) => (
+                <>
+                    <Button color="secondary" onClick={close}>
+                        Cancel
+                    </Button>
+                    <Button
+                        isDisabled={!pairs.length}
+                        onClick={() => {
+                            setData((d) => {
+                                const byQuestion = new Map(d.answers.map((a) => [a.question.trim().toLowerCase(), a]));
+                                const updated = d.answers.map((a) => {
+                                    const hit = pairs.find((p) => p.question.trim().toLowerCase() === a.question.trim().toLowerCase());
+                                    return hit ? { ...a, answer: hit.answer } : a;
+                                });
+                                const added = pairs.filter((p) => !byQuestion.has(p.question.trim().toLowerCase())).map((p) => ({ id: uid(), ...p }));
+                                return { ...d, answers: [...added, ...updated] };
+                            });
+                            setText("");
+                            close();
+                        }}
+                    >
+                        {pairs.length ? `Import ${pairs.length} answer${pairs.length === 1 ? "" : "s"}` : "Import"}
+                    </Button>
+                </>
+            )}
+        >
+            <TextArea aria-label="Answers to import" rows={14} value={text} onChange={setText} placeholder={"Q: Why do you want to work for {company}?\nA: …\n\nQ: What is your notice period?\nA: …"} />
+            <p className="mt-3 text-sm text-tertiary">
+                {pairs.length ? `Found ${pairs.length} answer${pairs.length === 1 ? "" : "s"}. Questions you already have are updated; new ones are added.` : "Nothing recognised yet."}
+            </p>
+        </AppDialog>
     );
 };

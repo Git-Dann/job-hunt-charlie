@@ -19,10 +19,12 @@ import { useAppData, useHydrated } from "@/lib/store";
 import { JOB_STATUSES, type JobStatus } from "@/lib/types";
 
 const JOB_PROMPTS = [
+    { id: "decode-advert", title: "Decode this job advert" },
     { id: "fit-check", title: "How well do I fit this job?" },
     { id: "tailor-cv", title: "Tailor my CV to this job" },
     { id: "cover-letter", title: "Write my cover letter" },
     { id: "company-research", title: "Research this company" },
+    { id: "phone-screen", title: "Prep for a recruiter call" },
     { id: "interview-prep", title: "Prepare me for the interview" },
     { id: "outreach", title: "Message the hiring manager" },
 ];

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyCheck, isDue, markSeen, newCount } from "../alerts";
-import { fillAnswer, intentsOf, matchAnswers, parseLimit, wordCount } from "../answers";
+import { fillAnswer, intentsOf, matchAnswers, parseLimit, parseQaPairs, wordCount } from "../answers";
 import type { JobListing, SavedAnswer, SavedSearch } from "../types";
 
 const job = (id: string, title = `Job ${id}`, company = "Acme"): JobListing => ({ id, title, company, url: `https://x/${id}`, source: "Reed" });
@@ -71,5 +71,24 @@ describe("answer bank", () => {
         expect(parseLimit("1,500 characters")).toEqual({ n: 1500, unit: "characters" });
         expect(wordCount(" one two  three ")).toBe(3);
         expect(intentsOf("Do you require sponsorship?")).toContain("rightToWork");
+    });
+});
+
+describe("importing AI-written answers", () => {
+    it("reads Q/A pairs, including multi-line answers and markdown", () => {
+        const text = `Q: Why do you want to work for {company}?
+A: I've followed {company} for years.
+It's the work I love.
+
+**Q:** Do you have a full UK driving licence?
+**A:** Yes.
+
+Q: Empty one
+A:
+`;
+        expect(parseQaPairs(text)).toEqual([
+            { question: "Why do you want to work for {company}?", answer: "I've followed {company} for years.\nIt's the work I love." },
+            { question: "Do you have a full UK driving licence?", answer: "Yes." },
+        ]);
     });
 });

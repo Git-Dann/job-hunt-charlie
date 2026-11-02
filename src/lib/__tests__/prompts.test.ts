@@ -20,7 +20,7 @@ describe("prompt library", () => {
     it("every prompt includes the CV, and job prompts include the advert", () => {
         for (const p of PROMPTS) {
             const text = p.build(ctx);
-            if (!["rejection", "questions-to-ask", "company-research", "thank-you"].includes(p.id)) expect(text, p.id).toContain("JANE SMITH");
+            if (!["rejection", "extract-jobs"].includes(p.id) && p.id !== "negotiate-x") expect(text, p.id).toContain("JANE SMITH");
             if (p.needsJob) expect(text, p.id).toMatch(/Acme/);
             expect(text, p.id).not.toMatch(/undefined|\[object Object\]/);
         }
@@ -28,12 +28,23 @@ describe("prompt library", () => {
 
     it("asks for the CV rather than inventing one when it's missing", () => {
         const text = PROMPTS.find((p) => p.id === "tailor-cv")!.build({ ...ctx, cv: "" });
-        expect(text).toContain("ask me for it first");
-        expect(text).toContain("Never invent");
+        expect(text).toContain("Ask me to paste it before doing anything else");
+        expect(text).toContain("NEVER invent");
     });
 
     it("only offers pre-filled chat links when the prompt fits in a URL", () => {
         expect(chatLinks("short").find((l) => l.id === "chatgpt")!.href).toContain("chatgpt.com/?q=short");
         expect(chatLinks("x".repeat(9000)).every((l) => l.href === null)).toBe(true);
+    });
+});
+
+describe("prompt depth", () => {
+    it("every prompt has a role, honesty rules and a defined output", () => {
+        for (const p of PROMPTS) {
+            const text = p.build(ctx);
+            expect(text, p.id).toContain("<role>");
+            expect(text, p.id).toMatch(/<output>|<rules>/);
+            expect(text.length, p.id).toBeGreaterThan(700);
+        }
     });
 });

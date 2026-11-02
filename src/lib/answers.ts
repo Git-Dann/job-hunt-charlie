@@ -110,3 +110,32 @@ export const STARTER_QUESTIONS: { question: string; tip: string }[] = [
     { question: "Why are you leaving your current role?", tip: "Keep it positive and forward-looking: what you're moving towards, not away from." },
     { question: "Where do you see yourself in five years?", tip: "Show ambition that fits the kind of role you're applying for." },
 ];
+
+/**
+ * Read "Q: … / A: …" pairs, the format the "Fill my answer bank" prompt asks the AI for.
+ * Copes with markdown bold, numbering, "Question:/Answer:" labels and answers over several lines.
+ */
+export function parseQaPairs(text: string): { question: string; answer: string }[] {
+    const out: { question: string; answer: string }[] = [];
+    let cur: { question: string; answer: string } | null = null;
+    let mode: "q" | "a" | null = null;
+    for (const raw of text.split(/\r?\n/)) {
+        const line = raw.replace(/\*\*/g, "").replace(/^\s*(\d+[.)]\s*)/, "");
+        const q = line.match(/^\s*(?:Q|Question)\s*[:.-]\s*(.*)$/i);
+        const a = line.match(/^\s*(?:A|Answer)\s*[:.-]\s*(.*)$/i);
+        if (q) {
+            if (cur && cur.question && cur.answer.trim()) out.push(cur);
+            cur = { question: q[1].trim(), answer: "" };
+            mode = "q";
+        } else if (a && cur) {
+            cur.answer = a[1];
+            mode = "a";
+        } else if (cur && mode === "a") {
+            cur.answer += `\n${line}`;
+        } else if (cur && mode === "q" && line.trim()) {
+            cur.question += ` ${line.trim()}`;
+        }
+    }
+    if (cur && cur.question && cur.answer.trim()) out.push(cur);
+    return out.map((x) => ({ question: x.question.trim(), answer: x.answer.trim().replace(/\n{3,}/g, "\n\n") }));
+}
