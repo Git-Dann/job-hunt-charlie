@@ -7,7 +7,6 @@ import { defaultChecklist, focusAreas, interviewIcs, likelyQuestions } from "../
 import { funnel, nudge, streak, weekStart, weeklyApplications } from "../progress";
 import { formatGbp, parseAdzunaHistogram, parseSalary, salaryStats, statsFromHistogram } from "../salary";
 import { decodePayload, encodePayload, payloadFromShare, payloadToListing, splitPageTitle } from "../save-job";
-import { companyFlags, parseCompanyProfile, parseCompanySearch, sizeFromAccounts } from "../sources/companies-house";
 import { emptyProfile } from "../store-normalise";
 import type { Interview, TrackedJob } from "../types";
 
@@ -97,20 +96,6 @@ describe("salary", () => {
         expect(statsFromHistogram(bands)!.median).toBe(35000);
         expect(formatGbp(32400)).toBe("£32.5k");
         expect(formatGbp(35000)).toBe("£35k");
-    });
-});
-
-describe("Companies House", () => {
-    it("parses search results and a profile, with plain-English flags", () => {
-        expect(parseCompanySearch({ items: [{ company_number: "01234567", title: "ACME LTD", company_status: "active", date_of_creation: "2010-05-01" }] })[0]).toMatchObject({ number: "01234567", name: "ACME LTD" });
-        const p = parseCompanyProfile(
-            { company_number: "01234567", company_name: "ACME LTD", company_status: "active", date_of_creation: "2010-05-01", sic_codes: ["82301"], accounts: { last_accounts: { type: "small" }, overdue: true }, registered_office_address: { address_line_1: "1 High St", locality: "Leeds", postal_code: "LS1 1AA" } },
-            { active_count: 3 },
-            new Date("2026-11-02"),
-        );
-        expect(p).toMatchObject({ ageYears: 16, sizeHint: sizeFromAccounts("small"), activeOfficers: 3, address: "1 High St, Leeds, LS1 1AA" });
-        const flags = companyFlags(p);
-        expect(flags).toEqual(expect.arrayContaining([{ tone: "good", text: "Active company" }, { tone: "bad", text: "Accounts are overdue" }]));
     });
 });
 

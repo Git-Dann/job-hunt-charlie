@@ -15,7 +15,6 @@ A personal job-hunting portal, built mobile-first on [Untitled UI React](https:/
 | **Interviews** | Each interview with a prep pack: likely questions built from the advert's own wording (e.g. it mentions budgets → "Tell me about a budget you managed"), her matching Answer bank answers, what they'll probe, a checklist for the format (video, phone, in person, assessment), questions to ask, notes, outcome, and **Add to calendar** (.ics with a 1-hour reminder). AI optional: full prep, mock interview, research, thank-you. |
 | **Progress** | Weekly application target, streak, 8-week chart, and the saved → applied → interview → offer funnel with rates. Worked out from what she already tracks. |
 | **Salary check** | On each job: median and typical range from live UK adverts (Adzuna histogram, or Reed listings), compared with the advertised salary. Needs her free Adzuna or Reed key. |
-| **Company check** | On each job: live Companies House record — status, age, size (from accounts filed), directors, SIC codes, overdue accounts or insolvency flags. Needs a free Companies House key (hers in Settings, or the site owner's `COMPANIES_HOUSE_API_KEY` env var). Without one it links to the public register. |
 | **Save from anywhere** | Desktop "Save to Charlie's Jobs" bookmark button that reads the job page's own data (works even on LinkedIn); Android share sheet (installable app with a share target); "Save from a link" anywhere, which reads the details for her. |
 | **Word CV** | Any tailored CV downloads as a real .docx (many UK agencies ask for Word). |
 | **My applications** | Tracker (Saved, Applied, Interviewing, Offer, Closed) with next steps, notes and contacts. CSV export. Per-job CV match score and job-specific AI prompts. |
@@ -62,7 +61,9 @@ Sync details: there are no accounts. The private code identifies her data, and t
 | Name | What it does |
 |---|---|
 | `DATABASE_URL` | Set automatically by Vercel's Neon integration; turns on sync. |
-| `COMPANIES_HOUSE_API_KEY` | A free Companies House REST key, so company checks work without her adding her own. |
+| `REED_API_KEY` | Reed key for everyone, so Charlie doesn't add one on each device. |
+| `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` | Adzuna keys for everyone (jobs and salary data). |
+| `ADZUNA_COUNTRY` | Optional, defaults to `gb`. |
 
 ## Live source check
 

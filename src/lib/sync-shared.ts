@@ -9,7 +9,7 @@ export function forCloud(d: AppData): AppData {
     return {
         ...d,
         ai: { ...d.ai, apiKey: "" },
-        keys: { ...d.keys, reedApiKey: "", adzunaAppKey: "", companiesHouseKey: "" },
+        keys: { ...d.keys, reedApiKey: "", adzunaAppKey: "" },
     };
 }
 
@@ -18,7 +18,7 @@ export function fromCloud(cloud: AppData, local: AppData): AppData {
     return {
         ...cloud,
         ai: { ...cloud.ai, apiKey: local.ai.apiKey, ...(cloud.ai.provider ? {} : { provider: local.ai.provider, model: local.ai.model }) },
-        keys: { ...cloud.keys, reedApiKey: local.keys.reedApiKey, adzunaAppKey: local.keys.adzunaAppKey, companiesHouseKey: local.keys.companiesHouseKey },
+        keys: { ...cloud.keys, reedApiKey: local.keys.reedApiKey, adzunaAppKey: local.keys.adzunaAppKey },
     };
 }
 

@@ -2,6 +2,7 @@ import { rateLimited } from "@/lib/server/rate-limit";
 import { parseAdzunaHistogram, parseSalary, salaryStats, statsFromHistogram } from "@/lib/salary";
 import { parseReed } from "@/lib/sources/apis";
 import { safeJson } from "@/lib/sources/safe-fetch";
+import { withSiteKeys } from "@/lib/server/site-keys";
 import type { SourceKeys } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -9,7 +10,7 @@ export const maxDuration = 30;
 
 /**
  * What does this job pay? Real figures from live UK adverts: Adzuna's salary data (most reliable)
- * or salaries in Reed adverts. Uses her own free keys, sent with the request and never stored.
+ * or salaries in Reed adverts. Uses the keys set on the site, or her own from Settings.
  */
 
 const enc = encodeURIComponent;
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
     const what = (body.what ?? "").trim().slice(0, 120);
     const where = (body.where ?? "").trim().slice(0, 80);
     if (!what) return Response.json({ error: "Type a job title." }, { status: 400 });
-    const keys = body.keys ?? {};
+    const keys = withSiteKeys(body.keys);
     const notes: string[] = [];
 
     if (keys.adzunaAppId && keys.adzunaAppKey) {
@@ -67,6 +68,6 @@ export async function POST(req: Request) {
     }
 
     if (!keys.adzunaAppKey && !keys.reedApiKey)
-        return Response.json({ error: "Add a free Adzuna or Reed key in Settings to see real salary data.", needsKey: true }, { status: 400 });
+        return Response.json({ error: "Salary data needs a free Adzuna or Reed key (see Settings).", needsKey: true }, { status: 400 });
     return Response.json({ error: notes.join(" ") || "No salary data found. Try a broader job title or leave the location blank." }, { status: 404 });
 }

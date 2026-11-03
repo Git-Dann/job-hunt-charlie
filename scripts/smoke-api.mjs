@@ -17,9 +17,9 @@ check("/api/scrape reads a careers page", scrape.status === 200 && scrape.json.j
 const ssrf = await post("/api/scrape", { urls: ["http://169.254.169.254/latest/meta-data/"] });
 check("/api/scrape refuses private addresses", ssrf.json.pages?.[0]?.ok === false && /public/.test(ssrf.json.pages[0].error), ssrf.json.pages?.[0]?.error);
 const salary = await post("/api/salary", { what: "events manager", where: "", keys: {} });
-check("/api/salary explains it needs a key", salary.status === 400 && salary.json.needsKey === true);
-const company = await fetch(`${B}/api/company?q=monzo`).then(async (r) => ({ status: r.status, json: await r.json() }));
-check("/api/company answers", company.status === 200 ? company.json.matches?.length > 0 : company.json.needsKey === true, company.status === 200 ? `${company.json.matches.length} matches` : "needs a key (none configured)");
+check("/api/salary answers, or explains it needs a key", salary.status === 200 || (salary.status === 400 && salary.json.needsKey === true), `status ${salary.status}`);
+const siteKeys = await fetch(`${B}/api/site-keys`).then((r) => r.json());
+check("/api/site-keys reports which keys the site has", typeof siteKeys.reed === "boolean" && typeof siteKeys.adzuna === "boolean", JSON.stringify(siteKeys));
 const ai = await post("/api/ai", { provider: "anthropic", apiKey: "sk-ant-invalid", model: "claude-haiku-5-5", prompt: "hi" });
 check("/api/ai reaches Anthropic and reports a bad key clearly", ai.status === 502 && /didn't accept/.test(ai.json.error), ai.json.error);
 const sync = await fetch(`${B}/api/sync`).then((r) => r.json());

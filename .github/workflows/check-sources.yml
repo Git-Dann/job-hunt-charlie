@@ -26,7 +26,6 @@ jobs:
           (npx next start -p 3000 &) && sleep 6
           node scripts/smoke-api.mjs http://localhost:3000
         env:
-          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
       - run: npx tsx scripts/check-sources.ts
         env:
           REED_API_KEY: ${{ secrets.REED_API_KEY }}

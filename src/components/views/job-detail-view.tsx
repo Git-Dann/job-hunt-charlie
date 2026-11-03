@@ -9,7 +9,6 @@ import { Input } from "@/components/base/input/input";
 import { NativeSelect } from "@/components/base/select/select-native";
 import { TextArea } from "@/components/base/textarea/textarea";
 import { AddInterviewDialog } from "@/components/app/add-interview-dialog";
-import { CompanyCard } from "@/components/app/company-card";
 import { KeywordMatch } from "@/components/app/keyword-match";
 import { SalaryCard } from "@/components/app/salary-card";
 import { formatWhen } from "@/lib/interview-actions";
@@ -197,7 +196,6 @@ export const JobDetailView = ({ id }: { id: string }) => {
                         Answer an application question
                     </Button>
                     <SalaryCard title={job.title} location={job.location} advertised={job.salary} jobId={job.id} />
-                    <CompanyCard company={job.company} jobId={job.id} />
                     {job.company && (
                         <Button color="secondary" className="whitespace-normal text-center" iconLeading={Users01} href={linkedinPeopleSearch(job.company, job.title)} target="_blank" rel="noreferrer">
                             Find people at {job.company}

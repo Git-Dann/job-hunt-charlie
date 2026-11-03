@@ -133,8 +133,6 @@ export interface SourceKeys {
     adzunaAppId: string;
     adzunaAppKey: string;
     adzunaCountry: string;
-    /** Free key from the Companies House developer hub (optional if the site owner set one). */
-    companiesHouseKey?: string;
 }
 
 export type InterviewOutcome = "upcoming" | "waiting" | "next-round" | "offer" | "rejected";

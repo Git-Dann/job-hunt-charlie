@@ -14,6 +14,7 @@ import { ThemeSwitch } from "@/components/app/theme-switch";
 import { AI_PROVIDERS, defaultModel } from "@/lib/ai-models";
 import { STORAGE_KEY, emptyData, normaliseData, replaceData, setData, useAppData, useHydrated } from "@/lib/store";
 import type { AiProvider, SourceKeys } from "@/lib/types";
+import { useSiteKeys } from "@/lib/use-site-keys";
 import { useRunAi } from "@/lib/use-ai";
 
 const setKeys = (patch: Partial<SourceKeys>) => setData((d) => ({ ...d, keys: { ...d.keys, ...patch } }));
@@ -22,6 +23,7 @@ export const SettingsView = () => {
     const data = useAppData();
     const hydrated = useHydrated();
     const { ai, keys } = data;
+    const siteKeys = useSiteKeys();
     const test = useRunAi();
     const fileRef = useRef<HTMLInputElement>(null);
     const [importMsg, setImportMsg] = useState("");
@@ -29,7 +31,7 @@ export const SettingsView = () => {
 
     const exportData = () => {
         // Keys stay out of the backup: it's the file most likely to be shared or emailed.
-        const safe = { ...data, ai: { ...data.ai, apiKey: "" }, keys: { ...data.keys, reedApiKey: "", adzunaAppKey: "", companiesHouseKey: "" } };
+        const safe = { ...data, ai: { ...data.ai, apiKey: "" }, keys: { ...data.keys, reedApiKey: "", adzunaAppKey: "" } };
         const blob = new Blob([JSON.stringify(safe, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
@@ -133,7 +135,7 @@ export const SettingsView = () => {
 
                 <Card>
                     <div id="sources" className="scroll-mt-20" />
-                    <CardHeader title="Free data keys" description="Free keys that unlock more UK job listings, real salary data and company checks. Each takes a couple of minutes to get." />
+                    <CardHeader title="Free data keys" description={siteKeys?.reed && siteKeys.adzuna ? "Reed and Adzuna are already set up on the site, so there\u2019s nothing to add here." : "Free keys that unlock more UK job listings and real salary data."} />
                     <div className="flex flex-col gap-6 px-4 py-4 md:px-6">
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-between gap-2">
@@ -144,26 +146,8 @@ export const SettingsView = () => {
                                     Get a free key
                                 </Button>
                             </div>
-                            <Input aria-label="Reed API key" type="password" placeholder="Reed API key" value={keys.reedApiKey} onChange={(v) => setKeys({ reedApiKey: v.trim() })} autoComplete="off" />
-                        </div>
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-semibold text-primary">
-                                    Companies House <span className="font-normal text-tertiary">— company checks</span>
-                                </p>
-                                <Button size="sm" color="link-color" href="https://developer.company-information.service.gov.uk/get-started" target="_blank" rel="noreferrer" iconTrailing={LinkExternal01}>
-                                    Get a free key
-                                </Button>
-                            </div>
-                            <Input
-                                aria-label="Companies House API key"
-                                type="password"
-                                placeholder="Companies House API key (REST)"
-                                value={keys.companiesHouseKey ?? ""}
-                                onChange={(v) => setKeys({ companiesHouseKey: v.trim() })}
-                                autoComplete="off"
-                                hint="Register, create an application, then add a REST API key. Not needed if the site owner has set one."
-                            />
+                            <SiteKeyNote on={siteKeys?.reed} />
+                            <Input aria-label="Reed API key" type="password" placeholder={siteKeys?.reed ? "Optional: use a different key" : "Reed API key"} value={keys.reedApiKey} onChange={(v) => setKeys({ reedApiKey: v.trim() })} autoComplete="off" />
                         </div>
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-between gap-2">
@@ -174,6 +158,7 @@ export const SettingsView = () => {
                                     Get a free key
                                 </Button>
                             </div>
+                            <SiteKeyNote on={siteKeys?.adzuna} />
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_8rem]">
                                 <Input aria-label="Adzuna app ID" placeholder="App ID" value={keys.adzunaAppId} onChange={(v) => setKeys({ adzunaAppId: v.trim() })} autoComplete="off" />
                                 <Input aria-label="Adzuna app key" type="password" placeholder="App key" value={keys.adzunaAppKey} onChange={(v) => setKeys({ adzunaAppKey: v.trim() })} autoComplete="off" />
@@ -258,3 +243,12 @@ export const SettingsView = () => {
         </Page>
     );
 };
+
+/** Shown when a key is already set on the site, so she knows there's nothing to do. */
+const SiteKeyNote = ({ on }: { on?: boolean }) =>
+    on ? (
+        <p className="flex items-center gap-2 text-sm text-success-primary">
+            <CheckCircle className="size-4 shrink-0" aria-hidden />
+            Already set up for you. Nothing to add.
+        </p>
+    ) : null;

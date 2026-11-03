@@ -29,6 +29,7 @@ import { JobCard } from "@/components/app/job-card";
 import { checkAlerts } from "@/lib/alert-runner";
 import { Card, CardHeader, Page, PageHeader } from "@/components/app/page-header";
 import { BOARDS, CAREERS_SITES_HOME, atsGoogleSearch, boardUrl, sourceSiteUrl } from "@/lib/boards";
+import { useSiteKeys } from "@/lib/use-site-keys";
 import { profileToText } from "@/lib/cv";
 import { matchKeywords } from "@/lib/keywords";
 import { listingMatches } from "@/lib/search-filter";
@@ -69,6 +70,7 @@ export const SearchView = () => {
     const data = useAppData();
     const hydrated = useHydrated();
     const { profile, keys, searches } = data;
+    const siteKeys = useSiteKeys();
 
     const [keywords, setKeywords] = useState(params.get("q") ?? "");
     const [location, setLocation] = useState(params.get("l") ?? "");
@@ -301,7 +303,7 @@ export const SearchView = () => {
                                     />
                                 ))}
                             </div>
-                            {hydrated && !keys.reedApiKey && (
+                            {hydrated && siteKeys && !siteKeys.reed && !siteKeys.adzuna && !keys.reedApiKey && !keys.adzunaAppKey && (
                                 <p className="mt-4 flex gap-2 text-sm text-tertiary">
                                     <InfoCircle className="mt-0.5 size-4 shrink-0 text-fg-quaternary" aria-hidden />
                                     <span>

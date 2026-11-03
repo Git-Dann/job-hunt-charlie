@@ -1,6 +1,7 @@
 import { SOURCES, type SourceResult } from "@/lib/sources/apis";
 import { dedupe, listingInLocation, listingMatches, sortByDate } from "@/lib/search-filter";
 import { rateLimited } from "@/lib/server/rate-limit";
+import { withSiteKeys } from "@/lib/server/site-keys";
 import type { SourceKeys } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -20,14 +21,14 @@ export async function POST(req: Request) {
     const keywords = (body.keywords ?? "").trim().slice(0, 200);
     if (!keywords) return Response.json({ error: "Type what you're looking for first." }, { status: 400 });
     const q = { keywords, location: (body.location ?? "").trim().slice(0, 100), remoteOnly: Boolean(body.remoteOnly) };
-    // Keys are her own, sent with each request and never stored on the server.
-    const keys: SourceKeys = { reedApiKey: "", adzunaAppId: "", adzunaAppKey: "", adzunaCountry: "gb", ...body.keys };
+    // Her own key from Settings if she added one, otherwise the key set on the site.
+    const keys = withSiteKeys(body.keys);
     const wanted = new Set(body.sources?.length ? body.sources : SOURCES.map((s) => s.id));
 
     const results: SourceResult[] = await Promise.all(
         SOURCES.filter((s) => wanted.has(s.id)).map(async (s): Promise<SourceResult> => {
-            if (s.needsKey && !keys[s.needsKey]) return { source: s.id, label: s.label, ok: true, jobs: [], skipped: "Add your free API key in Settings to include this." };
-            if (s.id === "adzuna" && !keys.adzunaAppId) return { source: s.id, label: s.label, ok: true, jobs: [], skipped: "Add your Adzuna app ID in Settings." };
+            if (s.needsKey && !keys[s.needsKey]) return { source: s.id, label: s.label, ok: true, jobs: [], skipped: "Needs a free API key (see Settings)." };
+            if (s.id === "adzuna" && !keys.adzunaAppId) return { source: s.id, label: s.label, ok: true, jobs: [], skipped: "Needs an Adzuna app ID (see Settings)." };
             try {
                 let jobs = (await s.run(q, keys)).filter((j) => j.title && j.url);
                 jobs = jobs.filter((j) => listingMatches(j, q.keywords));
